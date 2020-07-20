@@ -1,2 +1,2 @@
-# second_year_paper
-Repository to store the work on my second year paper
+# Second Year Paper Project
+This repository stores the code for my second year paper.

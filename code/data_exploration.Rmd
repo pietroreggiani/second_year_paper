@@ -1,0 +1,40 @@
+---
+title: "First Attempts to explore data"
+author: "Pietro"
+date: "7/17/2020"
+output: 
+  html_document:
+    keep_md:true
+---
+
+
+```{r setup, include=FALSE, echo=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+opts_knit$set(root.dir = "D:/Piter USB/PhD local folder/second_year_paper")
+```
+
+## Let's start by uploading the NAMES file
+
+```{r}
+gc(full = TRUE)
+library(data.table)
+alldata <- fread("data/raw/s34_master1.csv")
+head(alldata)
+class(alldata)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
