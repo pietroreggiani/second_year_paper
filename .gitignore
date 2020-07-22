@@ -54,3 +54,4 @@ po/*~
 
 #some folders excluded
 koijen_yogo_replication/
+.Rproj.user
