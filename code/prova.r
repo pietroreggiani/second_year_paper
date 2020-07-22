@@ -17,4 +17,12 @@
 #+ dotchart
 
 
+#' the following line sets up the connection to WRDS selecting the data
 res <- dbSendQuery(wrds, "select * from crsp.dsf")
+
+#' data is actually retrieved only now, limited to 100 obs
+data <- dbFetch(res, n=100)
+
+#' now we close the connection, so a new query can be established
+dbClearResult(res)
+data
