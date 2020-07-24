@@ -29,7 +29,6 @@ wrds <- dbConnect(Postgres(),
                   dbname='wrds',
                   sslmode='require',
                   user='preggian')
-################################################################################
 ```
 
 This code spits out all the available libraries in WRDS.
@@ -77,5 +76,4 @@ the actual data.
 res <- dbSendQuery(wrds, "select * from tfn.s34 where fdate >='2020-03-31'")
 data <- as.data.table(dbFetch(res, n=100))  #use data.table package
 dbClearResult(res)
-View(data)
 ```
