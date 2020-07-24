@@ -30,7 +30,6 @@ wrds <- dbConnect(Postgres(),
                   sslmode='require',
                   user='preggian')
 
-
 #' This code spits out all the available libraries in WRDS.
 res <- dbSendQuery(wrds, "select distinct table_schema
                    from information_schema.tables where table_type ='VIEW'
@@ -66,9 +65,3 @@ View(vars)
 res <- dbSendQuery(wrds, "select * from tfn.s34 where fdate >='2020-03-31'")
 data <- as.data.table(dbFetch(res, n=100))  #use data.table package
 dbClearResult(res)
-View(data)
-
-
-
-
-
