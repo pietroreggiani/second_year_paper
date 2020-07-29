@@ -18,3 +18,4 @@ The data files from WRDS I downloaded are:
 * Master file
 * Names file
 
+There is also a csv file that includes the CCM database quarterly from 1980 to 2019. That file uncompressed should be over 2GB so probably not usable offline. I got that file from WRDS at the link given by Ralph and Moto. The issue is that it seems the file is easy to query online from WRDS, and hard to get directly using the Postgres query of R. From the postgres query I can only get the link file that does not have the data attached to it.

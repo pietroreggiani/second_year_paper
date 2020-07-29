@@ -16,7 +16,7 @@
 #' The **output** of the code is 
 
 #'
-#' ## Load packages and connect to WRDS.
+#' ## Load packages and connect to WRDS
 #' 
 #+ Setup
 
@@ -91,7 +91,7 @@ dbClearResult(res)
 #' 
 res <- dbSendQuery(wrds, "select distinct table_name
                    from information_schema.columns
-                   where table_schema='crspq'
+                   where table_schema='crsp'
                    order by table_name")
 crsp.libraries <- dbFetch(res, n=-1)  
 dbClearResult(res)
@@ -119,8 +119,8 @@ dbClearResult(res)
 
 res <- dbSendQuery(wrds, "select column_name
                    from information_schema.columns
-                   where table_schema='crspq'
-                   and table_name='ccmxpf_lnkhist'
+                   where table_schema='crsp'
+                   and table_name='ccm_qvards'
                    order by column_name")
 ccm.vars <- dbFetch(res, n=-1)  
 dbClearResult(res)
@@ -132,5 +132,5 @@ dbClearResult(res)
 
 ccm <- ccm[order(gvkey, linkdt)]
 
-
+#' The next step is to figure out how to merge the data sources and get a ready to use file
 
