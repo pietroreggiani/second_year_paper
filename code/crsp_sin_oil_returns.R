@@ -20,6 +20,10 @@ wrds <- dbConnect(Postgres(),
                   dbname='wrds',
                   sslmode='require',
                   user='preggian')
+library(ggplot2)
+library(latex2exp)
+library(sandwich)
+#library(tidyverse)
 
 #' ## Load Data from WRDS
 #' Here we download the list of all available libraries from WRDS
@@ -100,8 +104,9 @@ dbClearResult(res)
 
 ccm <- ccm[order(gvkey, linkdt)]
 
-#' The next step is to figure out how to merge the data sources and get a ready to use file
+######################################################
 
+#' The next step is to figure out how to merge the data sources and get a ready to use file
 #' upload the CRSP file directly so it's easier
 crsp.data      <- fread('data/raw/crsp_monthly.csv')[order(PERMNO,date)]
 crsp.data$RET  <- as.numeric(crsp.data$RET)
@@ -112,7 +117,7 @@ suppressWarnings(ff.data    <- fread('data/raw/FF_5factors.csv',     header = TR
 suppressWarnings(momentum   <- fread('data/raw/FF_momentum.csv',     header = TRUE, skip = 3 ), classes = "warning")
 suppressWarnings(ff.sectors <- fread('data/raw/FF_48industries.csv', header = TRUE, skip = 11), classes = "warning")
 #fix date from French to date format
-setnames(ff.data,"V1", "date")
+setnames(ff.data,c("V1","Mkt-RF"), c( "date",  "MKT"))
 ff.data[, year := substr(ff.data$date, 1,4)]
 ff.data[, month := substr(ff.data$date, 5,6)]
 date <- dmy(    paste("10", ff.data$month, ff.data$year, sep= "/")  )
@@ -160,14 +165,104 @@ names.fossil <- sort(unique(fossils$COMNAM), decreasing=FALSE)
 sin.returns    <- sins[ , .(sinret = mean(RET, na.rm = TRUE)) ,  by = date][order(date)]
 fossil.returns <- fossils[ , .(fossilret=mean(RET, na.rm = TRUE)) ,  by = date][order(date)]
 
-setkey(ff.data, "date")
-setkey(sin.returns,"date")
+#extract from factor table the dates that are not included in the CRSP returns
+ff.data.short <- ff.data[date %between% range(sin.returns$date),]
+ff.data.short[, sinret := sin.returns$sinret * 100][,fossilret := fossil.returns$fossilret *100]
 
-ff.data <- sin.returns[ff.data]
-
-
-#' ## Compare Returns
-#' We have categorized stocks within groups of sin or oil. Now we want to compare the returns across the different groups.
+ff.data.short$excomp <- ff.data.short$sinret - ff.data.short$comparables
 
 
+# from the CRSP documentation it does not seem that the returns are annualized. They are monthly returns.
 
+####rolling#####################################################################
+#' ## Rolling window regressions to estimate alphas
+#' We follow Hong and Kacperkzyk Table 4 where they compute excess returns relative to a 4 factor model.
+#' what the code needs to do is:
+#' * take three years of data (36 observations)
+#' * run regression and save alpha
+#' * shift by one month ahead
+#' * re-run and save alpha and so on.
+
+len <- dim(ff.data.short)[1] # length of window in months
+i <- 0 # will move the rolling window
+
+for (regressand in c("excomp","fossilret", "fossil"))
+{
+    vars <- c(regressand, "MKT", "SMB", "HML", "Mom") #to extract the variables we need
+    estimates <- data.table(alpha=vector(), se=vector())
+    
+    while (len+i <= dim(ff.data.short)[1])
+    {
+        reg.data <- ff.data.short[1:len +i, ..vars] #contains regressors and regressand
+        lin.model <- lm( regressand ~ MKT + SMB + HML + Mom, data = reg.data )
+        se <- unname( sqrt( diag( NeweyWest(lin.model, prewhite = F, adjust = T, lag= 2)))[1] )
+        alpha<- unname(lin.model$coefficients[1]) #add intercept to alpha vector
+        estimates <- rbind(estimates, list(alpha, se))
+        # check if reached the end
+        i <- i+1
+    }
+    
+    coefficients <- data.table("end_date"= ff.data.short$date[len:dim(ff.data.short)[1]], estimates)
+    ttest <- abs( coefficients$alpha / coefficients$se ) - 1.96
+    #' The mean  of the alphas is `mean(alphas)`
+    #' ### Plot the intercepts over time, with confidence intervals
+    
+    ggplot(coefficients, aes(end_date, alpha, colour = class) )+
+        geom_line(arrow=arrow(), colour="blue")+ 
+        ggtitle(paste("Alphas of ", len,  "-month Rolling Regressions", sep="")) + xlab("Rolling Window End") + ylab(TeX("$ \\alpha $")) +
+        geom_hline(yintercept=0, color="black", linetype ="dashed") +
+        theme(panel.background = element_blank(), axis.line = element_line(colour = "black") )
+    
+    #plot(1:length(ttest),ttest)
+}
+
+#nothing seems to be significant when I do it :)
+
+###subsample regressions#############################################
+#' ## Ten year regressions
+#' As a different attempt, let's simply split the sample in 4 blocks and estimate the parameter separately for each block of data
+#' 
+num.subs <- 10  #decide how many sub-samples you want
+len <-  dim(ff.data.short)[1] %/% num.subs # length of window in months
+
+
+for (regressand in c("excomp", "sinret","fossilret", "fossil")) #loop through regressands
+    {
+    vars <- c(regressand, "MKT", "SMB", "HML", "Mom")    #to extract the variables we need
+    estimates <- data.table(sample = Date(), alpha=vector(), se=vector(), ttest = vector(), cint1= vector(), cint2= vector()) #storage for estimated parameters
+    
+    for  (sample in 1:num.subs)
+    {
+        if (sample < num.subs){
+            reg.data <- ff.data.short[ (sample-1)*len + 1:len , ..vars] #contains regressors and regressand
+            end.date <- ff.data.short$date[(sample-1)*len + len]
+        } else {
+            reg.data <- ff.data.short[((sample-1)*len +1):dim(ff.data.short)[1], ..vars] #the last sample reaches the last date in any case
+            end.date <- ff.data.short$date[dim(ff.data.short)[1]]
+        }
+        lin.model <- lm( get(regressand) ~ MKT + SMB + HML + Mom, data = reg.data )
+        se <- unname( sqrt( diag( NeweyWest(lin.model, prewhite = F, adjust = T, lag=2)))[1] )
+        alpha<- unname(lin.model$coefficients[1]) #add intercept to alpha vector
+        ttest <- abs( alpha /se) - 1.96
+        cint <- c(alpha - se * 1.96, alpha + se*1.96)
+        estimates <- rbind(estimates, list(  end.date  , alpha, se, ttest, cint[1], cint[2]))
+        # check if reached the end
+    }
+    
+    
+    #' The mean  of the alphas is `mean(alphas)`
+    #' ### Plot the intercepts over time, with confidence intervals
+    
+    ggplot(estimates, aes(sample, alpha) )+
+        geom_point(colour="blue")+ 
+        ggtitle(paste("Alphas by subsample  ", regressand, sep="")) + xlab("sample end date") + ylab(TeX("$ \\alpha $")) +
+        geom_hline(yintercept=0, color="black", linetype ="dashed") +
+        theme(panel.background = element_blank(), axis.line = element_line(colour = "black") ) +
+        geom_errorbar( aes(ymin=cint1, ymax= cint2))
+    
+    ggsave(paste('outputs/charts/', regressand, '_alphas.png', sep = ""), scale = 0.5)
+    
+    #plot(1:length(ttest),ttest)
+}
+
+#' Sin does not seem to deliver excess returns any more, while fossil fuel looks like it is underperforming!!

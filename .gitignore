@@ -52,6 +52,9 @@ po/*~
 *.pdf
 *.html
 
+# Output pictures
+outputs/
+
 #some folders excluded
 koijen_yogo_replication/
 .Rproj.user
