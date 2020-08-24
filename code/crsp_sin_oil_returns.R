@@ -23,6 +23,7 @@ wrds <- dbConnect(Postgres(),
 library(ggplot2)
 library(latex2exp)
 library(sandwich)
+library(xtable) # to print to Latex
 #library(tidyverse)
 
 #' ## Load Data from WRDS
@@ -185,6 +186,7 @@ ff.data.short$excomp <- ff.data.short$sinret - ff.data.short$comparables
 
 len <- dim(ff.data.short)[1] # length of window in months
 i <- 0 # will move the rolling window
+newey.lags <- 2
 
 for (regressand in c("excomp","fossilret", "fossil"))
 {
@@ -195,7 +197,7 @@ for (regressand in c("excomp","fossilret", "fossil"))
     {
         reg.data <- ff.data.short[1:len +i, ..vars] #contains regressors and regressand
         lin.model <- lm( regressand ~ MKT + SMB + HML + Mom, data = reg.data )
-        se <- unname( sqrt( diag( NeweyWest(lin.model, prewhite = F, adjust = T, lag= 2)))[1] )
+        se <- unname( sqrt( diag( NeweyWest(lin.model, prewhite = F, adjust = T, lag= newey.lags)))[1] )
         alpha<- unname(lin.model$coefficients[1]) #add intercept to alpha vector
         estimates <- rbind(estimates, list(alpha, se))
         # check if reached the end
@@ -222,9 +224,11 @@ for (regressand in c("excomp","fossilret", "fossil"))
 #' ## Ten year regressions
 #' As a different attempt, let's simply split the sample in 4 blocks and estimate the parameter separately for each block of data
 #' 
-num.subs <- 10  #decide how many sub-samples you want
+num.subs <- 8  #decide how many sub-samples you want
 len <-  dim(ff.data.short)[1] %/% num.subs # length of window in months
+newey.lags <- 2
 
+estimated.alphas <-data.table()
 
 for (regressand in c("excomp", "sinret","fossilret", "fossil")) #loop through regressands
     {
@@ -241,14 +245,18 @@ for (regressand in c("excomp", "sinret","fossilret", "fossil")) #loop through re
             end.date <- ff.data.short$date[dim(ff.data.short)[1]]
         }
         lin.model <- lm( get(regressand) ~ MKT + SMB + HML + Mom, data = reg.data )
-        se <- unname( sqrt( diag( NeweyWest(lin.model, prewhite = F, adjust = T, lag=2)))[1] )
+        #se <- unname( sqrt( diag( NeweyWest(lin.model, prewhite = F, adjust = T, lag=newey.lags)))[1] ) apparently in this way you don't need newey-west
+        se <- sqrt( vcov(lin.model)[1,1])
         alpha<- unname(lin.model$coefficients[1]) #add intercept to alpha vector
-        ttest <- abs( alpha /se) - 1.96
+        tstat <- abs( alpha /se)
         cint <- c(alpha - se * 1.96, alpha + se*1.96)
-        estimates <- rbind(estimates, list(  end.date  , alpha, se, ttest, cint[1], cint[2]))
+        estimates <- rbind(estimates, list(  end.date  , alpha, se, tstat, cint[1], cint[2]))
         # check if reached the end
+        
     }
+    estimated.alphas <-rbind(estimated.alphas, estimates)
     
+    #print(xtable(  estimated.alphas, type = "latex"), file = "outputs/tables/alphas.tex")
     
     #' The mean  of the alphas is `mean(alphas)`
     #' ### Plot the intercepts over time, with confidence intervals

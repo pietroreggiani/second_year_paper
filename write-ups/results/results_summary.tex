@@ -1,0 +1,92 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb, float}
+\usepackage{listings}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+%\usepackage{subcaption} alternative to subfig
+\usepackage[round]{natbib}
+\usepackage[english]{babel}
+\usepackage{marginnote}
+\usepackage{array}%for tables
+\usepackage{hyperref}
+
+\usepackage{subcaption}
+
+\usepackage{pgffor}
+
+    
+
+%\usepackage{subfig}  %to align two figures side by side
+\usepackage{float}
+\usepackage[font={footnotesize}]{caption}  %to customize captions
+\usepackage[noorphans,font=itshape]{quoting}
+
+
+\numberwithin{equation}{section} %gets equation numbering follow the section
+\linespread{1.3}
+
+\graphicspath{{D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/}}
+\setlength{\parindent}{1cm}
+\setlength{\parskip}{0.5cm plus4mm minus3mm}
+
+
+\AtBeginDocument{\renewcommand{\bibname}{References}} %to call bibliography references
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+ 
+ 
+\begin{document}
+ 
+% --------------------------------------------------------------
+%                         Start here
+% --------------------------------------------------------------
+ 
+Pietro Reggiani August 2020
+
+
+
+\section{Sin and Fossil Stocks Historical Alphas}
+This section follows Hong and Kacperkzyk 2009 \textit{Price of Sin} paper. What they document is that stocks that belong to the sin category (alcohol tobacco and gaming) show positive abnormal returns, lower institutional ownership and lower analyst coverage.
+
+
+ The goal of my exercise is to check the robustness of abnormal returns outside of the sample they use, and whether the fossil fuel industry displays any similar patterns. 
+ 
+ I take monthly stock prices from CRSP, and monthly factor returns from Ken French's website. The time period considered is January 1980 to December 2019.
+Within the CRSP universe, I isolate two different sub-samples of stocks. The first sub-sample is the one of "Sin Stocks" as defined by Hong and Kacperkzyk: beer and liquor, smoke and tobacco (industry categories follow SIC and NAICS codes). The second one is fossil stocks (coal, petroleum and natural gas SICs).
+Then, I compute the monthly equal-weighted return for each sub-sample (fossil stock returns also have an alternative measure coming from the return in the Ken French industry portfolio file), and compare it to what is predicted by a standard four-factor model (FF 3-factor + momentum). 
+
+
+Following Hong and Kacperkzyk, I run time series regressions of the type:
+$$ Portfolio\_return_t = \alpha + \beta' * Factors_t + \varepsilon_t   $$
+where \textit{Factors} represents a vector of four classic factors (market, size, value and momentum). The regressands are, in turn: 
+\begin{itemize}
+\item $excomp$ is the equal weighted monthly return of the sin portfolio minus the return of a portfolio of comparable industries as defined by Hong and Kacperkzyk (Food, Soda, Fun and Meals-restaurants-hotels in the Fama-French classification)
+\item $sinret$ is the equal weighted monthly return of the sin portfolio
+\item $fossilret$ is the equal weighted monthly return of CRSP stocks in coal, petroleum and natural gas sectors.
+\item $fossil$ is the equal weighted monthly return of the Fama-French Coal and Oil portfolios together.
+\end{itemize}
+
+Hong and Kacperkzyk estimate $\alpha$ using 3-year rolling regressions and then averaging the coefficients to get a single estimate. I could not understand how to handle standard errors in this case, so I opted for estimating the alpha separately for different time periods. The estimates shown below are for 5 sub-samples of 6 years each (72 observations per sample), standard errors are estimated using the Newey West correction allowing for autocorrelation up to 2 lags. Confidence intervals at the 95\% confidence level are plotted around the estimates.
+
+\foreach \n in {excomp, sinret, fossil, fossilret}{
+\begin{figure}[H]
+\includegraphics[scale=0.7]{\n_alphas.png}
+\caption{}
+\end{figure}
+}
+
+If instead I simply estimate $\alpha$ considering the whole sample 1980-2019, the estimates look like this.
+
+ \input{../../outputs/tables/alphas}
+ 
+Two things strike me as potentially interesting. The consistent over-performance of the sin portfolio (albeit not when considered in excess of comparables), and the under-performance of the fossil fuel sector in the recent period. This under-performance is robust to splitting the sample in even smaller sub-periods, and is consistent with a shift away from brown firms in the recent period (mind that the covid months, extremely bad for the fossil industry, are not part of the sample).
+ 
+
+ 
+ 
+\end{document}
