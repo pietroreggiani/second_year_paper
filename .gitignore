@@ -47,13 +47,14 @@ po/*~
 *.zip
 *.dta
 *.csv
+*.gz
 
 #Output files that come from other files
 *.pdf
 *.html
 
 # Output pictures
-outputs/
+output/
 
 #some folders excluded
 koijen_yogo_replication/

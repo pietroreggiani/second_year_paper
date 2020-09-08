@@ -224,7 +224,7 @@ for (regressand in c("excomp","fossilret", "fossil"))
 #' ## Ten year regressions
 #' As a different attempt, let's simply split the sample in 4 blocks and estimate the parameter separately for each block of data
 #' 
-num.subs <- 8  #decide how many sub-samples you want
+num.subs <- 5  #decide how many sub-samples you want
 len <-  dim(ff.data.short)[1] %/% num.subs # length of window in months
 newey.lags <- 2
 

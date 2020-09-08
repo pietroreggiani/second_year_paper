@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7400 64-bit) (preloaded format=pdflatex 2020.5.9)  24 AUG 2020 15:48
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 2.9.7400 64-bit) (preloaded format=pdflatex 2020.5.9)  25 AUG 2020 15:50
 entering extended mode
 **./results_summary.tex
 (results_summary.tex
@@ -594,7 +594,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 {C:/Users/Pietro/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
 <D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/excomp_alphas.p
-ng, id=24, 505.89pt x 505.89pt>
+ng, id=20, 505.89pt x 505.89pt>
 File: D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/excomp_alp
 has.png Graphic file (type png)
 <use D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/excomp_alph
@@ -603,7 +603,7 @@ Package pdftex.def Info: D:/Piter USB/PhD local folder/second_year_paper/output
 s/charts/excomp_alphas.png  used on input line 81.
 (pdftex.def)             Requested size: 354.12057pt x 354.12057pt.
 <D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/sinret_alphas.p
-ng, id=25, 505.89pt x 505.89pt>
+ng, id=21, 505.89pt x 505.89pt>
 File: D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/sinret_alp
 has.png Graphic file (type png)
 <use D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/sinret_alph
@@ -612,7 +612,7 @@ Package pdftex.def Info: D:/Piter USB/PhD local folder/second_year_paper/output
 s/charts/sinret_alphas.png  used on input line 81.
 (pdftex.def)             Requested size: 354.12057pt x 354.12057pt.
 <D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/fossil_alphas.p
-ng, id=26, 505.89pt x 505.89pt>
+ng, id=22, 505.89pt x 505.89pt>
 File: D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/fossil_alp
 has.png Graphic file (type png)
 <use D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/fossil_alph
@@ -623,7 +623,7 @@ s/charts/fossil_alphas.png  used on input line 81.
  [2 <D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/excomp_alph
 as.png>]
 <D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/fossilret_alpha
-s.png, id=34, 505.89pt x 505.89pt>
+s.png, id=31, 505.89pt x 505.89pt>
 File: D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/fossilret_
 alphas.png Graphic file (type png)
 <use D:/Piter USB/PhD local folder/second_year_paper/outputs/charts/fossilret_a
@@ -641,40 +641,31 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 92.
  (results_summary.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 92.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 92.
-
-
-Package rerunfilecheck Warning: File `results_summary.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `results_summary.out':
-(rerunfilecheck)             Before: 322D70C574872293B6B8A3EB3465A6C6;126
-(rerunfilecheck)             After:  DD3317223600C0EC71D11176110AA1D2;74.
+Package rerunfilecheck Info: File `results_summary.out' has not changed.
+(rerunfilecheck)             Checksum: DD3317223600C0EC71D11176110AA1D2;74.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 92.
  ) 
 Here is how much of TeX's memory you used:
- 15877 strings out of 480930
- 267054 string characters out of 2909545
+ 15885 strings out of 480930
+ 267140 string characters out of 2909545
  526776 words of memory out of 3000000
- 31453 multiletter control sequences out of 15000+200000
- 538273 words of font info for 46 fonts, out of 3000000 for 9000
+ 31460 multiletter control sequences out of 15000+200000
+ 539972 words of font info for 54 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 48i,7n,52p,942b,391s stack positions out of 5000i,500n,10000p,200000b,50000s
-pdfTeX warning (dest): name{section.2} has been referenced but does not exist
-, replaced by a fixed one
-
- <C:\Users\Pietro\AppData\Local\MiKTeX\2.9\fonts/pk/ljfour/jknappen/ec/dpi600\t
-crm1200.pk><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.p
-fb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/P
-rogram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Fi
-les/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTe
-X 2.9/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files/MiKTeX 2.9/fon
-ts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1
-/public/amsfonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/a
-msfonts/cm/cmti12.pfb>
-Output written on results_summary.pdf (6 pages, 169540 bytes).
+ 48i,7n,52p,942b,398s stack positions out of 5000i,500n,10000p,200000b,50000s
+ <C:\Users\Pietro\AppData\Local\MiKTeX\2.9\fonts/pk/ljfour/jknappen/ec/dpi600
+\tcrm1200.pk><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12
+.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:
+/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program
+ Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/Mi
+KTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX 2.9/
+fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files/MiKTeX 2.9/fonts/typ
+e1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/publi
+c/amsfonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfont
+s/cm/cmti12.pfb>
+Output written on results_summary.pdf (6 pages, 188654 bytes).
 PDF statistics:
  93 PDF objects out of 1000 (max. 8388607)
- 14 named destinations out of 1000 (max. 500000)
- 37 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 13 named destinations out of 1000 (max. 500000)
+ 29 words of extra memory for PDF output out of 10000 (max. 10000000)
 
