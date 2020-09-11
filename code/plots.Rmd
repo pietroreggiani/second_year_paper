@@ -1,6 +1,6 @@
 ---
 title: "Graphs"
-output: html_notebook
+output: github_document
 ---
 
 This code takes the outputs from code run on the WRDS cloud, typically data.tables, and creates the necessary graphs and visualizations.
