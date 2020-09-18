@@ -43,14 +43,6 @@ library(dplyr)
 #library(xtable) # to print to Latex
 #library(tidyverse)
 
-# Connect to WRDS
-# This part below is already in the Rprofile but for some reason it does not work with Markdown
-wrds <- dbConnect(Postgres(),
-                  host='wrds-pgdata.wharton.upenn.edu',
-                  port=9737,
-                  dbname='wrds',
-                  sslmode='require',
-                  user='preggian')
 
 #functions folder
 source("code/funs_warehouse.r")
@@ -60,11 +52,24 @@ options(stringsAsFactors = FALSE)
 
 
 ##### Load Data ########
+
+# Connect to WRDS
+# This part below is already in the Rprofile but for some reason it does not work with Markdown
+wrds <- dbConnect(Postgres(),
+                  host='wrds-pgdata.wharton.upenn.edu',
+                  port=9737,
+                  dbname='wrds',
+                  sslmode='require',
+                  user='preggian')
+
+
+
 #+ Take the Holdings Data from WRDS
 
 res <- dbSendQuery(wrds, "select * from tfn.s34")
 s34 <- as.data.table(dbFetch(res, n=-1))  #use data.table package
 dbClearResult(res)
+
 
 s34 <- s34[order(mgrname,cusip, -fdate)] #order by manager, stock and date 
 
@@ -134,7 +139,7 @@ setkeyv(crsp.data, c("ncusip","fdate"))
 #here you merge crsp in the s34 file, leaving out the unmatched rows
 merged <- merge(s34, crsp.data, by.x = c("cusip","fdate"), by.y= c("ncusip","fdate"), all.x = FALSE, all.y =FALSE )
 
-#check whether some of the S34 obs have been duplicated.
+#check whether some of the S34 obs have been duplicated during the merge
 test <- unique_id(merged, "identifier")  
 
 if (test == FALSE ){
@@ -172,7 +177,7 @@ if (test == FALSE ){
     }
 }
     
-#' We are left with the `merged` datatable that contains the merged holdings data.
+#' We are left with the `merged` data.table that contains the merged holdings data.
 
 no.merged <- dim(merged)[1]
 cat('We merged ', no.merged, 'out of ', dim(s34)[1],' observations in the holdings data to CRSP.')
@@ -182,29 +187,26 @@ cat('We merged ', no.merged, 'out of ', dim(s34)[1],' observations in the holdin
 #'
 
 # classify sin and fossil ##### 
-# Pick categories for Sin and Fossil stocks
-sin.sic <- c(2100:2199, 2080:2085)
-sin.naics <- c(7132,71312,713210,71329,713290,72112,721120)
+# Pick categories for Sin and Fossil stocks, following Hong and Kacperkzyk
+
+sin.sic <-  as.character(   c(2100:2199, 2080:2085) ) # make it string otherwise may give problems
+sin.naics <- as.character( c(7132,71312,713210,71329,713290,72112,721120) )
+
+merged$naics <- as.character(merged$naics)
+merged$siccd <- as.character(merged$siccd)
 
 #' create dummy for fossil fuel industry. Following the Fama-French category 30, we have that:
 #' * 1200-1299 bituminous coal and lignite mining
 #' * 1300-1399 various oil and gas categories
 #' * 2900-2912 and 2990-2999 petroleum refining and miscellaneous
-fossil.sic <- c(1200:1299, 1300:1399, 2900:2912, 2990:2999)
+fossil.sic <- as.character( c(1200:1299, 1300:1399, 2900:2912, 2990:2999) )
 
 
 # Create the indicator variables for sin and fossil holdings
 
-merged$siccd <- as.integer(merged$siccd)
 
 merged[,sin := ifelse( siccd %in% sin.sic | naics %in% sin.naics ,1,0)]
 merged[,fossil := ifelse(siccd %in% fossil.sic ,1,0)]
-
-#' Every quarter, split firms by the proportion of their portfolio invested in sin or fossil
-
-#each, quarter, for every firm, compute the portfolio value
-test = sum(merged$sin)
-testf = sum(merged$fossil)
 
 
 #' ## Calculate fraction of portfolio invested in sin/fossil stocks for each manager
@@ -244,7 +246,7 @@ sin.frac.by.type$typecode <- as.integer(sin.frac.by.type$typecode)
 
 # the table needs to be saved so that we will do graphs afterwards
 
-saveRDS(sin.frac.by.type, file = 'output/sin_frac_by_type.rds')
+saveRDS(sin.frac.by.type, file = 'output/sin_frac_by_type_test.rds')
 
 
 
