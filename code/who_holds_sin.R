@@ -39,6 +39,7 @@ library(ggplot2)
 library(sandwich)
 library(stringr)
 library(dplyr)
+library(pryr)
 #library(R.utils)
 #library(xtable) # to print to Latex
 #library(tidyverse)
@@ -58,12 +59,13 @@ ptm <- proc.time()
 ##### Load Data ########
 
 # set number of rows to import from datasets (-1 is all available)
-rows = 1000
+rows = 10000
 
 #+ Take the Holdings Data from WRDS
 
 #use the user defined function
-s34 <- wrds.table("select * from tfn.s34", numrows = rows, data.table = TRUE )
+s34 <- wrds.table("select fdate, mgrno, typecode, cusip, shares, prc,shrout1, shrout2  from tfn.s34", 
+                  numrows = rows, data.table = TRUE )
 gc()
 
 #number of obs
@@ -73,7 +75,7 @@ numobs.s34 <- dim(s34)[1]
 mindate <- min(s34$fdate)
 maxdate <- max(s34$fdate)
 
-cat(memory.size())
+mem_used()
 
 ## NEW get from WRDS ####
 
@@ -89,31 +91,75 @@ query <-  "select distinct  a.permno, a.cusip, b.ncusip, ugvkey as gvkey, uiid a
                             and (ulinkprim = 'P' or ulinkprim = 'C') 
                             and usedflag = 1 " 
 
-crsp.data <-  unique( wrds.table(query, numrows = rows) )
+crsp.data <-  wrds.table(query, numrows = rows, data.table =  TRUE)
 
 crsp.data$year <- year(crsp.data$date) #to link to Compustat
 
 
-# get Compustat yearly, only NAICS
+# get Compustat yearly, only NAICS and SIC
 
-compustat <- unique (wrds.table("select naicsh as naics, sich as sic, gvkey, datadate as date from comp.funda", numrows = rows) )
-#sich here is historical, in crsp hsic is header.
+compustat <- unique (wrds.table("select naicsh as naics, sich as sic, gvkey, datadate as date from comp.funda
+                                where naicsh is not NULL OR sich is not NULL",
+                                numrows = rows) )
+# sich here is historical, in crsp hsic is header.
+
 compustat$year <- year(compustat$date)
 
+#if there are duplicates of gvkey-year
+if ( !unique_id(compustat,c("gvkey","year")) ){
+    
+    message('gvkey and year do not uniquely identify observations from Compustat')
+    
+    compustat <-  compustat[, N := .N, by = .(gvkey, year)][order(-N,gvkey,-year,-date)]
+    
+    #take if it has at least naics that's the variable we want
+    compustat<- unique ( compustat[N==1 | N>1  &  !is.na(naics) ][, c("N", "date"):=NULL]  )[naics < 999990 & sic < 9995]
+    
+    
+    # keep most recent industry identifier
+    
+    if (unique_id(compustat,c("gvkey","year"))){
+        message("Compustat now has unique identifiers, we can proceed 1")
+        
+    } else {
+        compustat <- compustat[, N := .N, by = .(gvkey, year)][order(-N,gvkey,-year)][N==1 | N>1 & !is.na(sic) & !is.na(naics)]
+        if (unique_id(compustat,c("gvkey","year"))){
+            message("Compustat now has unique identifiers, we can proceed 2")
+            compustat <- compustat[, N:=NULL]
+        } else {
+            message("Still cannot create unique identifier in Compustat, brutally keep most recent for the duplicates.")
+            compustat <- compustat[, c("N", "id") := .(.N, seq_len(.N)), by = .(gvkey, year)][N==1 | N>1 & id==1]#[,c("N", "id"):= NULL]
+            
+            if( unique_id(compustat,c("gvkey","year"))){
+                message("Compustat now has unique identifiers, we can proceed 3")
+                
+                compustat[, c("N", "id"):= NULL]
+                
+            } else {
+                stop("Still cannot create unique identifier in Compustat")
+            }
+        }
+    }
+}
+
 # merge CRSP and naics from compustat
-crsp.data <- merge(crsp.data, compustat, by = c("gvkey","year"), all.x = TRUE, all.y =FALSE )[, date.y:= NULL]
+crsp.data <- left_join(crsp.data, compustat, by = c("gvkey","year") ) %>% setDT()
 crsp.data$naics <- as.character(crsp.data$naics)
 
 remove(compustat) #to save memory
 gc()
 
 #replace missing industry codes from Compustat with the CRSP ones, and the missing NCUSIP with CUSIP
-crsp.data <- (crsp.data %>% mutate( naics = fifelse( is.na(naics), crspnaics, naics),
-                                    sic   = fifelse( is.na(sic)  , crspsic,   sic  ), 
-                                    ncusip  = fifelse( is.na(ncusip),cusip, ncusip )) )[, c("crspnaics", "crspsic") := NULL ]
-setnames(crsp.data, "date.x", "date")
 
-cat(memory.size())
+crsp.data <- crsp.data %>% mutate( naics   = fifelse( is.na(naics), crspnaics, naics),
+                      sic     = fifelse( is.na(sic)  , crspsic,   sic  ), 
+                      ncusip  = fifelse( is.na(ncusip), cusip, ncusip )
+                      )   %>%  unique() %>% subset(select = -c(crspnaics, crspsic)) %>% setDT()
+
+
+setnames(crsp.data, "date.x", "date", skip_absent = TRUE)
+
+mem_used()
 
 ##########old piece #######################################
 
@@ -138,15 +184,20 @@ cat(memory.size())
 ###
 
 # some cleaning and formatting
-crsp.data$date <- as.Date(crsp.data$date,'%m/%d/%Y')
-crsp.data <- crsp.data[ between(date, mindate, maxdate)] #keep only dates in S34
+
+#crsp.data$date <- list(as.Date(crsp.data$date, format = '%m/%d/%Y'))
+
+insample <-  between(crsp.data$date, mindate, maxdate)
+crsp.data <- crsp.data[ insample ] #keep only dates in S34
 
 
 #' ## Merge CRSP into holdings data.
 
 #create surrogate keys
 s34[, identifier := rownames(s34)]
-crsp.data[, crsp.id := rownames(crsp.data)]
+crsp.data$crsp.id <-  rownames(crsp.data)
+
+cat(class(crsp.data))
 
 
 #' ### Clean Duplicates
@@ -158,7 +209,7 @@ crsp.data[, crsp.id := rownames(crsp.data)]
 
 if(!unique_id(crsp.data, c("ncusip","date"))){
     cat('Ncusip-date do not uniquely identify observations from CRSP! I cannot proceed')
-    crsp.data <- crsp.data[, repetitions := .N, by = c('ncusip','fdate')][order(repetitions,fdate,ncusip)]
+    crsp.data <- crsp.data[, repetitions := .N, by = c('ncusip','date')][order(repetitions,date,ncusip)]
 } else {
     cat('Ncusip and date are unique identifiers for the data in CRSP.\n We can proceed to merge.')
 }
@@ -172,13 +223,13 @@ setkeyv(s34, c("cusip","fdate"))
 setkeyv(crsp.data, c("ncusip","date"))
 
 #here you merge crsp in the s34 file, leaving out the unmatched rows
-merged <- inner_join(s34, crsp.data, by = c("cusip" = "ncusip", "fdate" = "date") )
+merged <- inner_join(s34, crsp.data, by = c("cusip" = "ncusip", "fdate" = "date") ) %>% setDT()
 
 #take non-merged parts of both datasets
 nonmerged <- s34[!crsp.data]
 nonmerged.crsp <- crsp.data[!s34]
 
-memory.size()
+mem_used()
 
 remove(s34, crsp.data) #to save memory
 
@@ -200,7 +251,7 @@ if (test == FALSE ){
     if( numobs.s34 -numobs.merged >0 ) {  #if there are some unmatched obs
         
         # try to merge using cusip
-        merged.round2 <- inner_join(nonmerged, nonmerged.crsp, by = c("cusip" = "cusip", "fdate" = "date") )
+        merged.round2 <- inner_join(nonmerged, nonmerged.crsp, by = c("cusip" = "cusip", "fdate" = "date") ) %>% setDT()
         
         remove(nonmerged, nonmerged.crsp)
         gc()
@@ -290,20 +341,6 @@ saveRDS(sin.frac.by.type, file = 'output/sin_frac_by_type.rds')
 
 #get total execution time
 proc.time() - ptm
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
 
 
 
