@@ -28,9 +28,8 @@ res <- dbSendQuery(wrds, "select column_name
 vars <- dbFetch(res, n=-1)
 dbClearResult(res)
 
-res <- dbSendQuery(wrds, "select * from crsp.msf")
-crsp.msf <- dbFetch(res, n=1000)
-dbClearResult(res)
+
+crsp.msf <- wrds.table("select * from crsp.msf", numrows=1000)
 
 res <- dbSendQuery(wrds, "select * from crsp.ccmxpf_linktable")
 crsp.ccmxpf_linktable <- dbFetch(res, n=1000)
@@ -40,9 +39,8 @@ res <- dbSendQuery(wrds, "select * from crsp.ccmxpf_lnkused")
 crsp.ccmxpf_lnkused <- dbFetch(res, n=1000)
 dbClearResult(res)
 
-res <- dbSendQuery(wrds, "select * from crsp.msenames")
-crsp.msenames <- dbFetch(res, n=1000)
-dbClearResult(res)
+
+crsp.msenames <- wrds.table( "select * from crsp.msenames" , numrows=1000)
 
 
 # this is the example from the WRDS R page
@@ -95,7 +93,6 @@ res <- dbSendQuery(wrds,  "select a.permno, a.cusip, a.permco, a.date, comnam, n
  crsp.data <- wrds.table(query, numrows = 1000  )
  
  crsp.data$year <- year(crsp.data$date)
- 
  
  
  
