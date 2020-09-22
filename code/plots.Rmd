@@ -16,7 +16,7 @@ library(ggplot2)
 ## Who holds sin over time
 
 ```{r upload}
-sin.frac.by.type <- readRDS(file = 'output/sin_frac_by_type_test.rds')
+sin.frac.by.type <- readRDS(file = 'output/sin_frac_by_type_Fri8pm.rds')
 ```
 
 ```{r plot}

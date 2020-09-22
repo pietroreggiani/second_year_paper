@@ -23,7 +23,7 @@
 
 # clear environment
 
-#rm(list=ls()) 
+rm(list=ls()) 
 
 # Load Packages
 
@@ -53,37 +53,59 @@ options(stringsAsFactors = FALSE)
 
 ##### Load Data ########
 
-# Connect to WRDS
-# This part below is already in the Rprofile but for some reason it does not work with Markdown
-wrds <- dbConnect(Postgres(),
-                  host='wrds-pgdata.wharton.upenn.edu',
-                  port=9737,
-                  dbname='wrds',
-                  sslmode='require',
-                  user='preggian')
-
-
-
 #+ Take the Holdings Data from WRDS
 
-res <- dbSendQuery(wrds, "select * from tfn.s34")
-s34 <- as.data.table(dbFetch(res, n=-1))  #use data.table package
-dbClearResult(res)
+#use the user defined function
+s34 <- wrds.table("select * from tfn.s34", numrows = -1, data.table = TRUE )[order(mgrno,cusip, -fdate)] 
 
-
-s34 <- s34[order(mgrname,cusip, -fdate)] #order by manager, stock and date 
+#number of obs
+numobs.s34 <- dim(s34)[1]
 
 # sample start-end dates
 mindate <- min(s34$fdate)
 maxdate <- max(s34$fdate)
 
 
+
+## NEW get from WRDS ####
+
+# get CRSP monthly and its link with CCM link table
+
+query <- "select distinct a.permno, ncusip, a.cusip, ugvkey as gvkey, uiid as iid, date, prc,
+                            vol, ret, comnam, siccd as crspsic, naics as crspnaics
+                            from crsp.msf a
+                            left join crsp.msenames b   on  a.permno = b.permno and  a.date between b.namedt  and  b.nameendt 
+                            left join crsp.ccmxpf_lnkused  c 
+                            on  a.permno = c.apermno and a.date between ulinkdt and coalesce(ulinkenddt, '2020-09-30' ) 
+                            where (ulinktype = 'LU' or ulinktype =  'LC')
+                            and (ulinkprim = 'P' or ulinkprim = 'C') 
+                            and usedflag = 1 " 
+
+crsp.data <- wrds.table(query, numrows = 1000  )
+
+crsp.data$year <- year(crsp.data$date)
+
+
+# get Compustat yearly, only NAICS
+
+naics <- unique (wrds.table("select naicsh as naics, sich as sic, gvkey, datadate as date from comp.funda", numrows = 1000) )
+#sich here is historical, in crsp hsic is header.
+naics$year <- year(naics$date)
+
+
+# merge CRSP and naics from compustat
+crsp.data <- merge(crsp.data, naics, by = c("gvkey","year"), all.x = TRUE, all.y =FALSE )
+crsp.data$naics <- as.character(crsp.data$naics)
+
+
+crsp.data <- crsp.data %>% mutate(naics = fifelse( is.na(naics), crspnaics, naics) )
+
 #' Now we need to attach to the holdings information about the industry codes!
 #' We can get this through CRSP I believe.
 
 wanted.vars <- c("PRC","date","COMNAM", "TICKER","PERMNO","PERMCO","CUSIP","NCUSIP","SICCD","NAICS","SHRCD", "SHROUT")
 
-crsp.data      <- fread('data/raw/downloaded zip files/crsp_monthly_aug27.gz', select = wanted.vars)
+crsp.data      <- fread('data/raw/crsp_monthly_aug27.csv', select = wanted.vars)
 
 # some cleaning and formatting
 crsp.data$date <- as.Date(crsp.data$date,'%m/%d/%Y')
@@ -93,7 +115,6 @@ setnames(crsp.data, "date", "fdate")
 
 #remove observations that for some reason are duplicated
 crsp.data <- unique(crsp.data)
-
 
 
 #' ## Merge CRSP into holdings data.
@@ -138,6 +159,12 @@ setkeyv(crsp.data, c("ncusip","fdate"))
 
 #here you merge crsp in the s34 file, leaving out the unmatched rows
 merged <- merge(s34, crsp.data, by.x = c("cusip","fdate"), by.y= c("ncusip","fdate"), all.x = FALSE, all.y =FALSE )
+nonmerged <- s34[!crsp.data]
+
+remove(s34) #to save memory
+
+#count how many merged
+numobs.merged <- dim(merged)[1] 
 
 #check whether some of the S34 obs have been duplicated during the merge
 test <- unique_id(merged, "identifier")  
@@ -148,13 +175,13 @@ if (test == FALSE ){
 } else {
     # otherwise, it means there were no duplications in S34 which is good.
     # go on with trying to merge any remaining ones from S34
-    cat(paste('There are ', dim(s34)[1]-dim(merged)[1], ' observations from S34 that are not matched.'))
-    if(  dim(s34)[1]-dim(merged)[1] >0 ) {  #if there are some unmatched obs
-        
-        nonmerged <- s34[!crsp.data]
+    cat(paste('There are ', numobs.s34-numobs.merged, ' observations from S34 that are not matched.'))
+    if( numobs.s34 -numobs.merged >0 ) {  #if there are some unmatched obs
         
         # try to merge using cusip
         merged.round2 <- merge(nonmerged, crsp.data, by.x = c("cusip","fdate"), by.y= c("cusip","fdate"), all=FALSE )
+        
+        remove(crsp.data) #to save memory
         
         #if you match some of them this way
         if (dim(merged.round2)[1]>0){ 
@@ -169,9 +196,13 @@ if (test == FALSE ){
         if(dim(nonmerged)[1]>0){
             merged.round3 <-  merge(nonmerged, crsp.noncusip, by.x = c("cusip","fdate"), by.y= c("cusip","fdate"), all=FALSE )
             #again if you merge some this way, add them to the bottom of merged file
+            
+            remove(crsp.noncusip, nonmerged)  #to save memory
+            
             if(dim(merged.round2)[1]>0){
                 merged <- rbindlist(list( merged, merged.round3  ), use.names = TRUE, fill = TRUE)
             }
+            remove(merged.round2, merged.round3) #to save memory
         }
         
     }
@@ -179,8 +210,8 @@ if (test == FALSE ){
     
 #' We are left with the `merged` data.table that contains the merged holdings data.
 
-no.merged <- dim(merged)[1]
-cat('We merged ', no.merged, 'out of ', dim(s34)[1],' observations in the holdings data to CRSP.')
+numobs.merged <- dim(merged)[1]
+cat('We merged ', numobs.merged, 'out of ', numobs.s34,' observations in the holdings data to CRSP.')
 
 
 #' ## Sin and Fossil Stocks Classification
@@ -190,9 +221,10 @@ cat('We merged ', no.merged, 'out of ', dim(s34)[1],' observations in the holdin
 # Pick categories for Sin and Fossil stocks, following Hong and Kacperkzyk
 
 sin.sic <-  as.character(   c(2100:2199, 2080:2085) ) # make it string otherwise may give problems
-sin.naics <- as.character( c(7132,71312,713210,71329,713290,72112,721120) )
 
-merged$naics <- as.character(merged$naics)
+#PROBLEM : NAICS always gives an NA because the crsp data does not have it
+sin.naics <- as.character(c(7132,71312,713210,71329,713290,72112,721120) )
+
 merged$siccd <- as.character(merged$siccd)
 
 #' create dummy for fossil fuel industry. Following the Fama-French category 30, we have that:
@@ -203,8 +235,6 @@ fossil.sic <- as.character( c(1200:1299, 1300:1399, 2900:2912, 2990:2999) )
 
 
 # Create the indicator variables for sin and fossil holdings
-
-
 merged[,sin := ifelse( siccd %in% sin.sic | naics %in% sin.naics ,1,0)]
 merged[,fossil := ifelse(siccd %in% fossil.sic ,1,0)]
 
@@ -240,13 +270,15 @@ sin.frac.by.type <- merged[order(fdate,typecode),
                               fossil.frac = mean(fossil.frac) ) ,
                            by = .(fdate,typecode)   ]
 
+remove(merged)
+
 sin.frac.by.type$typecode <- as.integer(sin.frac.by.type$typecode)
 
 # export table ####
 
 # the table needs to be saved so that we will do graphs afterwards
 
-saveRDS(sin.frac.by.type, file = 'output/sin_frac_by_type_test.rds')
+saveRDS(sin.frac.by.type, file = 'output/sin_frac_by_type.rds')
 
 
 

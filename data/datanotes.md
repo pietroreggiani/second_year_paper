@@ -21,7 +21,14 @@ The data files from WRDS I downloaded are:
 
 There is also a csv file that includes the CCM database quarterly from 1980 to 2019. That file uncompressed should be over 2GB so probably not usable offline. I got that file from WRDS at the link given by Ralph and Moto. The issue is that it seems the file is easy to query online from WRDS, and hard to get directly using the Postgres query of R. From the postgres query I can only get the link file that does not have the data attached to it.
 
+### Compustat
+Take NAICS (*naicsh*) from `comp.funda` which is at the annual frequency but for now it's good enough.
+
+
 ### WRDS Compustat-CRSP link instructions
+The WRDS overview page for CCM can be accessed [here](https://wrds-www.wharton.upenn.edu/pages/support/manuals-and-overviews/crsp/crspcompustat-merged-ccm/wrds-overview-crspcompustat-merged-ccm/).
+
+
 This is the [link](https://wrds-www.wharton.upenn.edu/pages/support/applications/linking-databases/linking-crsp-and-compustat/) to the instructions . They provide an example SAS code that I copy here.
 
 ```SAS
@@ -47,3 +54,6 @@ proc sql;
 	and linkdt<=a.date<=coalesce(linkenddt, today());	/*LinkTable Date range conditions*/
 quit;
 ```
+[This](https://sites.google.com/site/ruidaiwrds/data/linking-crsp-and-compustat) is another useful page that provides roughly the same information about CCM linking.
+
+

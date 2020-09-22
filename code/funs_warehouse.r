@@ -29,29 +29,25 @@ unique_id <- function(x, varnames, verbose = FALSE) {
 
 #' Take variables from table in WRDS
 #'
-#' @param x string name of WRDS table to query
-#' @param dates the dates between which you want to search the data, should be a character vector of 2 elements. Formatting should be yyyy-mm-dd
-#' @param datename string identifying the relevant date variable name if you want to search for a specific time sub-sample. In S34 for instance it is fdate.
-#' @param numrows
-#' @param variables
-#' @param ordervars to specify an ordering of the table, should be a string or character vector
-#' @param data.table optional argument to specify whether you'd like to have the data imported as data.table, default is yes
+#' @param query string including the SQL query syntax for WRDS (see their webpage)
+#' @param numrows number of observations you want to get, default is all the available ones.
+#' @param data.table set to FALSE if you want a normal data.frame.
 #' 
-#' @return a data.table containing the WRDS data requested
-#' @export
-#'
-#' @examples
-wrds.table <- function(x, numrows = -1, dates = NULL, datename = "date", variables = NULL, ordervars = NULL, data.table = TRUE) {
-    #check if package is installed, if not install it
+#' @return a data.table or .frame containing the WRDS data requested
+#' 
+#' @examples data <- wrds.table( "select mgrname from tfn.s34 where fdate between '2013-01-02' and '2015-03-02' ", numrows=100)
+#' 
+wrds.table <- function(query, numrows = -1, data.table = TRUE) {
+    #check if packages are installed, otherwise install them
     if (!require(RPostgres)){
         install.packages("RPostgres")
     }
     if (!require(data.table)){
         install.packages("data.table")
     }
+    require(RPostgres, data.table) #load packages
     
-    require(RPostgres, data.table)
-    
+    #open connection to wrds
     wrds <- dbConnect(Postgres(),
                       host='wrds-pgdata.wharton.upenn.edu',
                       port=9737,
@@ -59,34 +55,17 @@ wrds.table <- function(x, numrows = -1, dates = NULL, datename = "date", variabl
                       sslmode='require',
                       user='preggian')
     
-    if (is.null(variables)){
-        # you want all variables
-        input <- paste("select * from ", x )
-    } else {
-        # if you pick only some variables
-        input <- paste("select", paste(variables, collapse = " ")  ,"from", x)
-    }
-    
-    if (!is.null(dates)){
-        # if you have a start and end date
-        input <- paste(input, ' where ', datename ,' between ' ,"'", dates[1],"'", ' and ',"'" , dates[2],"'", sep='' )
-    }
-    if (!is.null(ordervars)){
-        # if you want to order by some variable
-        input <- paste(input, 'order by',paste(ordervars, collapse = " ") )
-    }
     # query data
-    res <- dbSendQuery(wrds, input)
+    res <- dbSendQuery(wrds, query)
     
     # save as data.table or as normal data.frame
     if (data.table){
-        data <- as.data.table(dbFetch(res, n= numrows ))
+        data <- setDT(dbFetch(res, n= numrows ))
     } else {
         data <- dbFetch(res, n= numrows )
     }
     
-    
-    dbClearResult(res)
+    dbClearResult(res)  #not sure I need this
     
     return(data)
     
