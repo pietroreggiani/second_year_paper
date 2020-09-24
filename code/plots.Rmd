@@ -16,13 +16,38 @@ library(ggplot2)
 ## Who holds sin over time
 
 ```{r upload}
-sin.frac.by.type <- readRDS(file = 'output/sin_frac_by_type_sep22.rds')
+sin.frac.by.type <- readRDS(file = 'output/sin_frac_by_type_sep23.rds')
 ```
 
-```{r plot}
+```{r plot sin}
 plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=sin.frac.wei, group = factor(typecode)))+
     geom_line(aes(colour=factor(typecode)))+
-    labs(color = "Investor Type")
+    labs(color = "Investor Type") +
+    ggtitle("Fraction of portfolio in Sin stocks by investor type")+
+    ylab("Wigthed fraction to Sin")
 plot
 ```
-
+```{r plot sin unweighted}
+plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=sin.frac, group = factor(typecode)))+
+    geom_line(aes(colour=factor(typecode)))+
+    labs(color = "Investor Type") +
+    ggtitle("Fraction of portfolio in Sin stocks by investor type")+
+    ylab("Fraction to Sin")
+plot
+```
+```{r plot fossil}
+plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=fossil.frac.wei, group = factor(typecode)))+
+    geom_line(aes(colour=factor(typecode)))+
+    labs(color = "Investor Type") +
+    ggtitle("Fraction of portfolio in Fossil stocks by investor type")+
+    ylab("Wigthed fraction to Fossil")
+plot
+```
+```{r plot fossil unweighted}
+plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=fossil.frac, group = factor(typecode)))+
+    geom_line(aes(colour=factor(typecode)))+
+    labs(color = "Investor Type") +
+    ggtitle("Fraction of portfolio in Fossil stocks by investor type")+
+    ylab("Fraction to Fossil")
+plot
+```
