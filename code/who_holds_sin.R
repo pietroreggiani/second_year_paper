@@ -59,7 +59,7 @@ ptm <- proc.time()
 ##### Load Data ########
 
 # set number of rows to import from datasets (-1 is all available)
-rows = 10000
+rows = -1
 
 #+ Take the Holdings Data from WRDS
 
@@ -95,12 +95,16 @@ crsp.data <-  wrds.table(query, numrows = rows, data.table =  TRUE)
 
 crsp.data$year <- year(crsp.data$date) #to link to Compustat
 
+# when closing price does not exist, crsp records negative prices. Change that here
+crsp.data$prc <- abs(crsp.data$prc)
+
 
 # get Compustat yearly, only NAICS and SIC
 
 compustat <- unique (wrds.table("select naicsh as naics, sich as sic, gvkey, datadate as date from comp.funda
                                 where naicsh is not NULL OR sich is not NULL",
-                                numrows = rows) )
+                                numrows = rows) ) %>%
+    setDT()
 # sich here is historical, in crsp hsic is header.
 
 compustat$year <- year(compustat$date)
@@ -128,7 +132,7 @@ if ( !unique_id(compustat,c("gvkey","year")) ){
             compustat <- compustat[, N:=NULL]
         } else {
             message("Still cannot create unique identifier in Compustat, brutally keep most recent for the duplicates.")
-            compustat <- compustat[, c("N", "id") := .(.N, seq_len(.N)), by = .(gvkey, year)][N==1 | N>1 & id==1]#[,c("N", "id"):= NULL]
+            compustat <- compustat[, c("N", "id") := .(.N, seq_len(.N)), by = .(gvkey, year)][N==1 | N>1 & id==1]
             
             if( unique_id(compustat,c("gvkey","year"))){
                 message("Compustat now has unique identifiers, we can proceed 3")
@@ -136,14 +140,15 @@ if ( !unique_id(compustat,c("gvkey","year")) ){
                 compustat[, c("N", "id"):= NULL]
                 
             } else {
-                stop("Still cannot create unique identifier in Compustat")
+                stop("Still cannot create unique identifier in Compustat, execution halted.")
             }
         }
     }
 }
 
 # merge CRSP and naics from compustat
-crsp.data <- left_join(crsp.data, compustat, by = c("gvkey","year") ) %>% setDT()
+crsp.data <- left_join(crsp.data, compustat, by = c("gvkey","year") ) %>%
+    setDT()
 crsp.data$naics <- as.character(crsp.data$naics)
 
 remove(compustat) #to save memory
@@ -151,10 +156,14 @@ gc()
 
 #replace missing industry codes from Compustat with the CRSP ones, and the missing NCUSIP with CUSIP
 
-crsp.data <- crsp.data %>% mutate( naics   = fifelse( is.na(naics), crspnaics, naics),
+crsp.data <- crsp.data %>% 
+    mutate( naics   = fifelse( is.na(naics), crspnaics, naics),
                       sic     = fifelse( is.na(sic)  , crspsic,   sic  ), 
                       ncusip  = fifelse( is.na(ncusip), cusip, ncusip )
-                      )   %>%  unique() %>% subset(select = -c(crspnaics, crspsic)) %>% setDT()
+                      )   %>% 
+    unique()%>%
+    subset(select = -c(crspnaics, crspsic)) %>%
+    setDT()
 
 
 setnames(crsp.data, "date.x", "date", skip_absent = TRUE)
@@ -293,8 +302,16 @@ fossil.sic <- as.character( c(1200:1299, 1300:1399, 2900:2912, 2990:2999) )
 
 
 # Create the indicator variables for sin and fossil holdings
-merged[,sin := ifelse( sic %in% sin.sic | naics %in% sin.naics ,1,0)]
-merged[,fossil := ifelse(sic %in% fossil.sic ,1,0)]
+merged[,sin    := ifelse( sic %in% sin.sic | naics %in% sin.naics ,1,0)]
+merged[,fossil := ifelse( sic %in% fossil.sic , 1, 0)]
+
+#check whether this step is creating any missing values
+if( any( is.na(merged$sic) ) ){
+    message('Be careful, the sin indicator is creating NAs')
+} 
+if ( any( is.na(merged$fossil) )  ){
+    message('Be careful, the fossil indicator is creating NAs')
+}
 
 
 #' ## Calculate fraction of portfolio invested in sin/fossil stocks for each manager
@@ -303,14 +320,15 @@ merged[,fossil := ifelse(sic %in% fossil.sic ,1,0)]
 merged[, pos.value := prc.x * shares]
 
 # total value of manager portfolio each date
-merged[, tot.value := sum(pos.value), by = .(mgrno, fdate)]
+merged[, tot.value := sum(pos.value, na.rm = TRUE), by = .(mgrno, fdate)]
 
 # calculate fraction of portfolio represented by each asset
 merged$frac <- merged[, .(pos.value/tot.value)]
 
 # for each manager, compute the fraction of sin and fossil stocks
-merged[, sin.frac := sum(sin * frac) , by = .(mgrno,fdate) ]
-merged[, fossil.frac := sum(fossil * frac) , by = .(mgrno,fdate) ]
+# mind how you handle missing values
+merged[, sin.frac    := sum(sin * frac, na.rm = TRUE)    , by = .(mgrno,fdate) ]
+merged[, fossil.frac := sum(fossil * frac, na.rm = TRUE) , by = .(mgrno,fdate) ]
 
 
 #' Look at type of investor that changed the most holdings in sin and fossil over time
@@ -321,14 +339,14 @@ merged[, fossil.frac := sum(fossil * frac) , by = .(mgrno,fdate) ]
 # Sin and Fossil Weights by type ####
 
 #weighted portion of portfolios in sin and fossil for each investor type
-sin.frac.by.type <- merged[order(fdate,typecode), 
-                           .( sin.frac.wei = sum(sin*pos.value)/sum(pos.value),
-                              fossil.frac.wei = sum(fossil*pos.value)/sum(pos.value),
-                              sin.frac = mean(sin.frac),
-                              fossil.frac = mean(fossil.frac) ) ,
-                           by = .(fdate,typecode)   ]
+sin.frac.by.type <- merged[ order(fdate,typecode), 
+                           .( sin.frac.wei    = sum( sin*pos.value, na.rm = TRUE)     / sum( pos.value, na.rm = TRUE),
+                              fossil.frac.wei = sum( fossil*pos.value , na.rm = TRUE) / sum( pos.value, na.rm = TRUE),
+                              sin.frac        = mean(sin.frac,    na.rm = TRUE),
+                              fossil.frac     = mean(fossil.frac, na.rm = TRUE)     ),
+                              by = .(fdate,typecode)   ]
 
-remove(merged)
+#remove(merged)
 
 sin.frac.by.type$typecode <- as.integer(sin.frac.by.type$typecode)
 
