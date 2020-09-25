@@ -11,10 +11,14 @@
 
 #' Unique ID determination in data.frame
 #' 
-#' @description
-#' * INPUT: a data frame `x` and a character vector `varnames` of variable names.
-#' * OUTPUT: a logical value representing whether the two variables determine a unique identifier for the data
-#' * OPTIONS: if `verbose` is selected, the function returns a message about whether the variables are a unique identifier or not.
+#'  @description to check for unique identifiers in data.
+#' 
+#'  @param x data frame 
+#'  @param varnames character vector of variable names.
+#'  @param verbose  if TRUE the function returns a message about whether the variables are a unique identifier or not.
+#'  
+#'  @return  logical value representing whether the two variables determine a unique identifier for the data
+#' 
 unique_id <- function(x, varnames, verbose = FALSE) {
     
     test <- x[,..varnames]

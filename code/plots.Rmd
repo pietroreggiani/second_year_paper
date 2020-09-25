@@ -8,6 +8,7 @@ This code takes the outputs from code run on the WRDS cloud, typically data.tabl
 ```{r setup, include =FALSE}
 rm(list=ls())
 knitr::opts_knit$set(results='hide')
+knitr::opts_chunk$set(fig.width=12, fig.height=8) 
 
 
 library(ggplot2)
@@ -16,19 +17,40 @@ library(ggplot2)
 ## Who holds sin over time
 
 ```{r upload}
-sin.frac.by.type <- readRDS(file = 'output/sin_frac_by_type_sep23.rds')
+#sin.frac.by.type <- readRDS(file = 'output/sin_frac_by_type_sep23.rds')
+
+sin.frac.by.type <- fread(file = 'output/sin_frac_by_type.csv', header = TRUE, stringsAsFactors = FALSE)[order(typecode, yq)]
+
+```
+
+```{r plot number of managers}
+plot <- ggplot(data= sin.frac.by.type, aes(x=yq, y=num.managers, group = factor(typecode)))+
+    geom_line(aes(colour=factor(typecode)))+
+    labs(color = "Investor Type") +
+    ggtitle("Number of managers in sample over time")+
+    ylab("Wigthed fraction to Sin") + xlab('Quarter')
+plot
+```
+
+```{r plot number of observations}
+plot <- ggplot(data= sin.frac.by.type, aes(x=yq, y=num.obs, group = factor(typecode)))+
+    geom_line(aes(colour=factor(typecode)))+
+    labs(color = "Investor Type") +
+    ggtitle("Number of holdings observations in sample over time")+
+    ylab("Wigthed fraction to Sin") + xlab('Quarter')
+plot
 ```
 
 ```{r plot sin}
-plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=sin.frac.wei, group = factor(typecode)))+
+plot <- ggplot(data= sin.frac.by.type, aes(x=yq,y=sin.frac.wei, group = factor(typecode)))+
     geom_line(aes(colour=factor(typecode)))+
     labs(color = "Investor Type") +
     ggtitle("Fraction of portfolio in Sin stocks by investor type")+
-    ylab("Wigthed fraction to Sin")
+    ylab("Wigthed fraction to Sin") + xlab('Quarter')
 plot
 ```
 ```{r plot sin unweighted}
-plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=sin.frac, group = factor(typecode)))+
+plot <- ggplot(data= sin.frac.by.type, aes(x=yq,y=sin.frac, group = factor(typecode)))+
     geom_line(aes(colour=factor(typecode)))+
     labs(color = "Investor Type") +
     ggtitle("Fraction of portfolio in Sin stocks by investor type")+
@@ -36,7 +58,7 @@ plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=sin.frac, group = factor(ty
 plot
 ```
 ```{r plot fossil}
-plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=fossil.frac.wei, group = factor(typecode)))+
+plot <- ggplot(data= sin.frac.by.type, aes(x=yq,y=fossil.frac.wei, group = factor(typecode)))+
     geom_line(aes(colour=factor(typecode)))+
     labs(color = "Investor Type") +
     ggtitle("Fraction of portfolio in Fossil stocks by investor type")+
@@ -44,7 +66,7 @@ plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=fossil.frac.wei, group = fa
 plot
 ```
 ```{r plot fossil unweighted}
-plot <- ggplot(data= sin.frac.by.type, aes(x=fdate,y=fossil.frac, group = factor(typecode)))+
+plot <- ggplot(data= sin.frac.by.type, aes(x=yq,y=fossil.frac, group = factor(typecode)))+
     geom_line(aes(colour=factor(typecode)))+
     labs(color = "Investor Type") +
     ggtitle("Fraction of portfolio in Fossil stocks by investor type")+

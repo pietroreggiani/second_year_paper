@@ -10,7 +10,9 @@ output:
 This file will include notes for me to progress.
 
 ## Ideas
-* Garel and the other guy in the ESG covid paper use a measure of investor horizon that they compute using the 13F data. I could use this measure too and associate it to the ESG holdings. Maybe the more long term guys have shifted more away from polluting firms.
+* Garel and the other guy in the ESG covid paper use a measure of investor horizon that they compute using the 13F data. 
+I could use this measure too and associate it to the ESG holdings. 
+Maybe the more long term guys have shifted more away from polluting firms.
 
 ## To-Do Plan
 
