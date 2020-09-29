@@ -108,4 +108,24 @@ res <- dbSendQuery(wrds,  "select a.permno, a.cusip, a.permco, a.date, comnam, n
  
  
  
+
+ 
+ 
+test <- unique_id(prova, c("fdate","mgrno"))
+ 
+ 
+ 
+ 
+# solution for manager file from Koijen-Yogo
+
+
+prova <- fread("data/raw/ky_managers.csv")
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  

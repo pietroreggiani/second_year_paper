@@ -147,4 +147,16 @@ options notes;
 
 ```
 
+## Ralph and Moto Paper
+
+I paste here part of the data section in their paper where they explain what data choices they make. 
+
+>The data on stock prices, dividends, returns, and shares outstanding are from the Centerfor Research in Security Prices (CRSP) Monthly Stock Database. We restrict our sample to ordinary common shares (i.e., share codes 10, 11, 12, and 18) that trade on the NewYork Stock Exchange (NYSE), the American Stock Exchange, and Nasdaq (i.e., exchangecodes 1, 2, and 3). We further restrict our sample to stocks with non-missing price andshares outstanding. Accounting data are from the Compustat North America Fundamentals Annual and Quarterly Databases. We merge the CRSP data with the most recent Compustatdata as of at least 6 months and no more than 18 months prior to the trading date. The lag of at least 6 months ensures that the accounting data were public on the trading date.
+
+Here they describe their approach to merging the holdings data, and which ones they exclude:
+
+>We merge the institutional holdings data with the CRSP-Compustat data by CUSIP number and drop any holdings that do not match (i.e., 13(f) securities whose share codesare not 10, 11, 12, or 18). We compute the dollar holding for each stock that an institution holds as price times shares held. Assets under management is the sum of dollar holdings foreach institution. We compute the portfolio weights as the ratio of dollar holdings to assets under management.
+
+I need to drop those that are not matched then!
+
 

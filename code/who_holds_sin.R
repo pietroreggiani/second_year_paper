@@ -67,6 +67,9 @@ tic.clearlog()
 
 datebreaks <- c("1979-12-31","1989-12-31","1999-12-31","2009-12-31","2020-12-31" )
 
+# set number of rows to import from datasets (-1 is all available)
+rows = -1
+
 for (i in 2:length(datebreaks)){
     
     tic( paste("Loop round", i-1))
@@ -75,11 +78,9 @@ for (i in 2:length(datebreaks)){
     last.date <-  datebreaks[i]
     
     
+    #' ## Get data directly from WRDS ###
+    
     ###load data ####
-    
-    # set number of rows to import from datasets (-1 is all available)
-    rows = -1
-    
     
     #+ Take the Holdings Data from WRDS
     
@@ -111,14 +112,35 @@ for (i in 2:length(datebreaks)){
     #mindate <- min(s34$fdate)
     #maxdate <- max(s34$fdate)
     
-    #check for duplicate assets
+    #check for duplicate assets in the holdings data
     if ( !unique_id(s34, c("yq", "ncusip", "mgrno" ) ) ){
         message("Some cusip-manager-quarter observations are duplicated")
     }
     
     mem_used()
     
-    #' ## Get data directly from WRDS ###
+    #set key for merges
+    setkeyv(s34, c("mgrno","yq"))
+    
+    
+    #' We add the corrected manager types using the classification from Koijen-yogo
+    
+    ## merge in KY managers corrected types ####
+    
+    # this file comes from another code that cleans the original manager types and adds the missing years at the end.
+    
+    ky_managers <- fread("data/processed/ky_managers_cleaned.csv", stringsAsFactors = FALSE, 
+                         select = c("mgrno", "yq", "type"), data.table = TRUE)
+    
+   
+    setkeyv(ky_managers, c("mgrno","yq"))
+    
+    # merge it into S34
+    
+    s34 <- ky_managers[s34, on = c("yq", "mgrno")]
+    
+    remove(ky_managers)
+    
     
     ###### get CRSP monthly and its link with CCM link table ####
     
@@ -131,6 +153,8 @@ for (i in 2:length(datebreaks)){
                             where (ulinktype = 'LU' or ulinktype =  'LC')
                             and (ulinkprim = 'P' or ulinkprim = 'C') 
                             and usedflag = 1 
+                            and (shrcd IN (10,11,12,18))
+                            and (exchcd between 1 and 3)
                             and date between '", first.date, "' and '", last.date,"'", sep = "") 
     
     tic("CRSP Query")
@@ -310,7 +334,10 @@ for (i in 2:length(datebreaks)){
     #here you join crsp to the s34 file, keeping the unmatched holdings
     tic("S34-CRSP merge")
     
-    s34 <- crsp.data[s34]
+    #matched
+    s34 <- crsp.data[s34, nomatch = 0]
+    #unmatched
+    unmatched <- s34[!crsp.data]
     
     toc(log=TRUE)
     
@@ -318,15 +345,14 @@ for (i in 2:length(datebreaks)){
     mem_used()
     obj_size( s34 ); obj_size(crsp.data)
     
-    
     #count how many merged
-    numobs.merged <- dim( s34[!is.na(permno)] )[1] 
+    numobs.merged <- dim( s34 )[1] 
     
     #check whether some of the S34 obs have been duplicated during the merge
     test <- unique_id(s34, "identifier")  
     
     #get id of unmatched observations in s34
-    unmatched.ids <- s34[is.na(permno), identifier]
+    #unmatched.ids <- unmatched[, identifier]
     
     tic("Second round merge S34-CRSP")
     
@@ -342,25 +368,25 @@ for (i in 2:length(datebreaks)){
         if( unmatched.frac > 0 ) {  #if there are some unmatched obs
             
             # try to merge using cusip instead of ncusip
-            merged.round2 <- crsp.data[ s34[identifier %in% unmatched.ids], on = c(cusip = "ncusip", yq = "yq"), nomatch =0 ]
+            merged.round2 <- crsp.data[ unmatched, on = c(cusip = "ncusip", yq = "yq"), nomatch =0 ]
             
-            remove(crsp.data)
+            remove(crsp.data, unmatched)
             
             gc()
             
-            #if you match some of them this way
+            #if you match some of them this way, append them to the ones you had already matched before
             if ( dim(merged.round2)[1]>0 ){ 
-                # replace them back to initial holdings sample
-                s34 <-  rbindlist( list( s34[ !(identifier %in% merged.round2$identifier) ]  , merged.round2  ), use.names = TRUE, fill = TRUE)
+                
+                s34 <-  rbindlist( list( s34 , merged.round2  ), use.names = TRUE, fill = TRUE)
             }
             remove(merged.round2)
         }
     }
     toc(log =TRUE)
     
-    #' Now the s34 data contains all the holdings matched with the CRSP information
+    #' Now the s34 data contains only the holdings matched with the CRSP information
     
-    merged.frac  <-  100*(numobs.s34 -   dim( s34[!is.na(permno)] )[1] )/numobs.s34
+    merged.frac  <-  100*dim( s34 )[1] /numobs.s34
     cat('We matched ', merged.frac, 'percent of observations in the holdings data to CRSP.')
     
     
@@ -435,16 +461,16 @@ for (i in 2:length(datebreaks)){
                                    total.hldg      = sum(pos.value, na.rm = TRUE) ,
                                    num.managers    = uniqueN(mgrno),
                                    num.obs         = uniqueN(identifier)    ),
-                             by = .(yq,typecode)   ]
+                             by = .(yq,type)   ]
     
-    sin.frac.by.type$typecode <- as.integer(sin.frac.by.type$typecode)
+    #sin.frac.by.type$typecode <- as.integer(sin.frac.by.type$typecode)
     
     #export table
     if (i ==2){
         #first time include row header with names
-        write.table(sin.frac.by.type, file = 'output/sin_frac_by_type.csv', sep = ",", row.names = FALSE, quote = FALSE, col.names = TRUE)
+        write.table(sin.frac.by.type, file = 'output/sin_frac_by_type3.csv', sep = ",", row.names = FALSE, quote = FALSE, col.names = TRUE)
     } else{
-        write.table(sin.frac.by.type, file = 'output/sin_frac_by_type.csv', sep= ",", row.names = FALSE, quote = FALSE, col.names = FALSE , append = TRUE)
+        write.table(sin.frac.by.type, file = 'output/sin_frac_by_type3.csv', sep= ",", row.names = FALSE, quote = FALSE, col.names = FALSE , append = TRUE)
     }
     
     
