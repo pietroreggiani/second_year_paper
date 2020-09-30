@@ -9,12 +9,11 @@ wrds <- dbConnect(Postgres(),
                   sslmode='require',
                   user='preggian')
 
-library(RPostgres) 
 
 
 res <- dbSendQuery(wrds, "select distinct table_name
                    from information_schema.columns
-                   where table_schema='crsp'
+                   where table_schema='comp'
                    order by table_name")
 tables <- dbFetch(res, n=-1)
 dbClearResult(res)
@@ -23,11 +22,12 @@ dbClearResult(res)
 res <- dbSendQuery(wrds, "select column_name
                    from information_schema.columns
                    where table_schema='comp'
-                   and table_name='funda'
+                   and table_name='seg_product'
                    order by column_name")
 vars <- dbFetch(res, n=-1)
 dbClearResult(res)
 
+compustat.funda <- wrds.table("select * from comp.funda", numrows=1)
 
 crsp.msf <- wrds.table("select * from crsp.msf", numrows=1000)
 
@@ -122,7 +122,7 @@ test <- unique_id(prova, c("fdate","mgrno"))
 prova <- fread("data/raw/ky_managers.csv")
  
  
- 
+ sort(names(compustat.funda))
  
  
  
