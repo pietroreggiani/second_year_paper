@@ -32,6 +32,9 @@ unique_id <- function(x, varnames, verbose = FALSE) {
 
 
 #' Take variables from table in WRDS
+#' 
+#' @description Remember to change the username in the dbConnect call below. Before being able to open the connection, you need to follow the steps
+#'  [here](https://wrds-www.wharton.upenn.edu/pages/support/programming-wrds/programming-r/r-from-your-computer/) to set up your `.pgpass` file.
 #'
 #' @param query string including the SQL query syntax for WRDS (see their webpage)
 #' @param numrows number of observations you want to get, default is all the available ones.
@@ -48,6 +51,7 @@ wrds.table <- function(query, numrows = -1, data.table = TRUE) {
     }
     if (!require(data.table)){
         install.packages("data.table")
+        setDTthreads(0)
     }
     require(RPostgres, data.table) #load packages
     

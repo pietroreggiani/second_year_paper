@@ -59,3 +59,6 @@ output/
 #some folders excluded
 koijen_yogo_replication/
 .Rproj.user
+
+# corrupt file that does not work
+write-ups/slides/slides2.tex

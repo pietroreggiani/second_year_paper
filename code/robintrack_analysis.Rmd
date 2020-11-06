@@ -1,0 +1,315 @@
+---
+title: 'Investors see green during pandemics: evidence from Robinhood'
+author: "Pietro"
+date: "`r Sys.Date()`"
+output:  html_notebook
+---
+
+This is the file I used to present the first results to Rob. It is not the final file.
+
+## Introduction
+
+Some (Pastor 2020 , Garel-Romec 2020, Albuquerque et al. 2020 ) argue that investors' taste for ESG characteristics has increased during the pandemic. They show this by looking at stock returns and mutual fund flows.
+
+The goal of this exercise is to test whether there is evidence of an increased appetite for ESG on the part of retail investors. In particular, I look at data from the popular app Robinhood, that allowed many new retail investors to access financial markets during the first half of 2020.
+
+The goal is to understand which variables can explain the cross section of Robinhood holdings following the pandemic shock, and in particular whether there is evidence of a taste for more environmentally friendly firms.
+
+
+```{r setup, include=FALSE , eval = TRUE}
+
+#knitr::opts_knit$set(results='hide')
+knitr::opts_chunk$set(fig.width=9, fig.height=6) 
+knitr::opts_knit$set(root.dir = 'D:/Piter USB/PhD local folder/second_year_paper')
+setwd('D:/Piter USB/PhD local folder/second_year_paper')
+
+# clear environment
+
+rm(list=ls()) 
+
+# Load Packages
+
+library(data.table)
+setDTthreads(0)  #tells to use all available cores
+
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+library(hrbrthemes)
+library(RColorBrewer)
+library("reshape2")
+library(knitr)
+library(summarytools)
+
+#functions folder
+source("code/funs_warehouse.r")
+
+# change global option about string import
+options(stringsAsFactors = FALSE)
+
+
+# Load data
+data <- fread(file = 'data/processed/robintrack_crsp_esg_merged_ready.csv' ,
+              header = TRUE,  data.table = TRUE )
+
+numobs <- dim(data)[1]
+numfirms <- length(unique(data$DSCD))
+
+
+data[, date := as.Date(date)]
+
+
+mindate <- min(data$date)
+maxdate <- max(data$date)
+
+# drop last day as it creates problems
+data <- data[date < maxdate]
+maxdate <- max(data$date)
+
+
+```
+
+## Data 
+
+The data sources I use are:
+
+- **Robinhood**: number of users for each stock in the universe of stocks on the platform. These are mainly equities traded on U.S. exchanges and ADRs of foreign firms, plus ETFs;
+- **CRSP** daily stock file stock header information;
+- **Thomson Reuters**: ESG scores come from the ASSET4 database retrieved using Datastream, .
+
+Initially I have ca. 8.5k assets in the Robinhood universe. These are identified only using the ticker symbol. I merge 93 percent of the Robinhood observations to CRSP in order to have better company identifiers. 
+Then I match the universe of firms for which I have the Thomson Reuters data. This data set includes firms from all over the world. I discard those that have missing CUSIP, remaining with has approximately 4'000 firms, mostly American and Canadian. I match these data to the Robinhood data using CUSIP and ticker, then discard the worst 10% of matches according to the discrepancy between CRSP and Thomson Reuters firm names.
+
+This way I am left with a panel of `r numobs` observations for `r numfirms` firms in the sample. The holdings observations are at daily frequency from `r mindate` to `r maxdate`.
+
+
+### Summary Statistics
+
+
+```{r share codes, warning = FALSE, message=FALSE, echo= FALSE}
+
+share.code.dictionary <- data.table( share.code = c( 11,12,14,18, 31,48,71, 72), share.type = c("Ordinary common shares (11)",
+                                                                                                "Ordinary Common Shares Foreign Firms (12)",
+                                                                                                "Ordinary Common Shares Closed Funds (14)",
+                                                                                                "Ordinary shares in REITS (18)",
+                                                                                                "ADRs (31)",
+                                                                                                "Shares of Beneficial Interest in REIT (48)",
+                                                                                                "Units/ETF (71)",
+                                                                                                "Units/ETF foreign (72)")   )
+share.codes <- data[ , .(count = .N ) , by = hshrcd][order(hshrcd)]
+share.codes <- merge(share.codes, share.code.dictionary, by.x = 'hshrcd', by.y = 'share.code', all.x=TRUE)
+
+
+# share codes plot
+share.codes %>%
+  arrange(count) %>%
+  mutate(share.type=factor(share.type, share.type), count = 100* count / numobs) %>%
+  ggplot( aes(x=share.type, y=count) ) +
+    geom_segment( aes(x=share.type, xend = share.type ,y=0, yend=count), color="grey") +
+    geom_point(size=3, color="#69b3a2") +
+    coord_flip() +
+    theme_ipsum() +
+    theme(
+      panel.grid.minor.y = element_blank(),
+      panel.grid.major.y = element_blank(),
+      legend.position="none"
+    ) +
+    xlab("") + ylab('% of observations') + ggtitle('Share Code Distribution')
+
+
+```
+Almost all observations come from ordinary common shares, then there are shares in REITs and a few ADRs.
+
+```{r industries, warning = FALSE, echo = FALSE, fig.height=12}
+industries <- data[, .(fraction = 100 * .N / numobs), by = TRindustry]
+
+# industries
+industries %>%
+  filter(!is.na(TRindustry)) %>%
+  arrange(fraction) %>%
+  mutate(TRindustry=factor(TRindustry, TRindustry)) %>%
+  ggplot( aes(x=TRindustry, y=fraction) ) +
+    geom_segment( aes(x=TRindustry, xend = TRindustry ,y=0, yend=fraction), color="grey") +
+    geom_point(size=3, color="#69b3a2") +
+    coord_flip() +
+    theme_ipsum() +
+    theme(
+      panel.grid.minor.y = element_blank(),
+      panel.grid.major.y = element_blank(),
+      legend.position="none"
+    ) +
+    xlab("") + ylab('% of observations') + ggtitle('Industries')
+
+
+```
+
+In this sample there are some fossil stocks but very few sin sin stocks.
+
+
+```{r geography, warning = FALSE, echo = FALSE, fig.height=7}
+countries <- data[, .(fraction = 100 * .N / numobs), by = GEOGN]
+
+# countries
+countries %>%
+  filter(!is.na(GEOGN)) %>%
+  arrange(fraction) %>%
+  mutate(GEOGN=factor(GEOGN, GEOGN)) %>%
+  ggplot( aes(x=GEOGN, y=fraction) ) +
+    geom_segment( aes(x=GEOGN, xend = GEOGN ,y=0, yend=fraction), color="grey") +
+    geom_point(size=3, color="#69b3a2") +
+    coord_flip() +
+    theme_ipsum() +
+    theme(
+      panel.grid.minor.y = element_blank(),
+      panel.grid.major.y = element_blank(),
+      legend.position="none"
+    ) +
+    xlab("") + ylab('% of observations') + ggtitle('Geographic breakdown')
+
+
+```
+
+
+
+```{r assets over time, warning = FALSE, echo = FALSE}
+
+values <- data[ , .(numfirms =  length(  unique(DSCD)) , numusers = sum(users_holding) )   , by = date  ]
+
+#plot over time
+plot <- ggplot(values, aes(x=date, y= numfirms))+ geom_line() +ggtitle('Number of firms')
+plot
+
+```
+```{r users over time, warning = FALSE, echo = FALSE}
+
+#plot over time
+plot <- ggplot(values, aes(x=date, y= numusers))+ geom_line() +ggtitle('Number of Robinhood users')
+plot
+
+```
+
+
+```{r most and least held, warning = FALSE, echo = FALSE}
+
+rank.daily <- data[order(date, -users_holding)][, .(rank = 1:.N, firm = crsp_name, numfirms = .N)     , by = date]
+
+jan <- rank.daily[date=='2019-12-31' & (rank <= 20 | rank > numfirms -20 ) ,
+                  .(top20 = .SD[rank<=20, firm  ], bottom20 = .SD[rank>=numfirms-20, firm  ]    )   ]
+
+jun <- rank.daily[date=='2020-06-30' & (rank <= 20 | rank > numfirms -20 ) ,
+                  .(top20 = .SD[rank<=20, firm  ], bottom20 = .SD[rank>=numfirms-20, firm  ]    )   ]
+
+delta.users <- data[, .( delta.users = round(.SD[ date=='2020-06-30', users_holding   ]  - .SD[ date=='2019-12-31', users_holding   ], digits = 0 )   ) , by=crsp_name ][order(-delta.users)]
+
+length<- dim(delta.users)[1]
+
+extreme_changes <- delta.users[ , .(winners = .SD[c(1:20), crsp_name], losers= .SD[c(length:(length-19)), crsp_name] ) ]
+
+
+kables( list( kable(jan, caption='Dec 31st 2019'), kable(jun, caption = 'Jun 30th 2020') ), caption ='Most and least held stocks in Robinhood, pre and post pandemic')
+
+kable( extreme_changes, caption = 'Highest and lowest changes in number of users from Janary to June'  )
+
+cat('Summary stats of distribution of changes in users for each firm \n')
+print(summary(delta.users$delta.users))
+
+
+```
+
+The distribution of the changes in holdings looks very skewed to the right.
+
+## ESG stocks win race during pandemic
+
+Rank stocks based on the ESG score as of end of 2019. Look at changes in popularity across different ESG groups. For the firms for which the 2019 score is not available, I replace it with the 2018 score. This plot uses the Thomson Reuters overall ESG score.
+
+
+```{r ESG 2020 users, echo = FALSE}
+
+# take only data from end of 2019 until end of sample, for firms that have nonmissing ESG scores
+
+#rank firms according to their ESG score rank at the end of 2019, 
+
+values <- data[date > '2019-12-31' & !is.na(TRESGS), c('date','TRESGS', 'users_holding', 'DSCD', 'crsp_name')]
+
+esg.rank <- values[date == '2020-01-01'][order(TRESGS)][, .(rank = (1:.N)/.N, DSCD = DSCD   )  ]
+
+values <- merge(values, esg.rank, by = 'DSCD', nomatch = 0, allow.cartesian = TRUE)
+
+# split firms based on percentiles of rank
+values$quartile <- ntile(values$rank, 4) 
+
+
+# plot development of users for firms of the four quartiles
+values[, normalization := .SD[ date =='2020-01-01' , sum(users_holding)   ] , by = quartile]
+
+values[, .( users_holding = sum(users_holding) / normalization   ), by= c('date', 'quartile')] %>% 
+    ggplot(aes(x=date, y=users_holding, group = factor(quartile)))+
+    geom_line(aes(colour=factor(quartile)))+
+    labs(color = "2019 ESG score quartile") +
+    ggtitle("Robinhood Users change in 2020 by quartile of ESG score")+
+    ylab("Number of users") + xlab('date')+
+    theme(panel.background = element_rect(fill = "white") )
+
+
+```
+
+## Way forward
+
+1. Run regressions to explain the cross-section of changes in number of users, for instance 
+$$ \Delta users_{i} = \alpha_0 + \beta ESG_{i} + \gamma X_i +\varepsilon_i   $$ 
+where $X$ is a vector of characteristics for asset $i$ and the difference in users is calculated between some dates pre and post March 2020.
+    * I could analyze for instance three different subsamples: pre-pandemic VS summer, market crash and market recovery. Literature should help on this.
+    * Need to decide on the relevant control variables, industry? Fama-French factors?
+    * Need more data on company characteristics to put as controls: Compustat? Datastream? Only 6% of firms are matched to a gvkey of Compustat, maybe          Datastream is a better way.  
+    * May need info on returns? CRSP only available up to end of 2019, maybe can look at Bloomberg? I am thinking of Momentum for instance.
+ 
+
+
+
+
+<p>&nbsp;</p>  
+<p>&nbsp;</p>  
+<p>&nbsp;</p>  
+<p>&nbsp;</p>  
+<p>&nbsp;</p> 
+<p>&nbsp;</p>  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

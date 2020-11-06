@@ -1,9 +1,15 @@
 ---
-title: "Graphs"
-output: github_document
+title: "Sin and Fossil proportion in S34 holdings over time"
+output: html_notebook
 ---
 
-This code takes the outputs from code run on the WRDS cloud, typically data.tables, and creates the necessary graphs and visualizations.
+## Data 
+
+I take the holdings from S34 and match them with information on SIC and NAICS codes from CRSP and Compustat. Then I split the sample into different manager types and plot the time variation of sin and fossil sectors in their portfolios.
+
+The match rate S34-CRSP is almost 90%. I drop the holdings that do not match. 
+
+This code takes the outputs from the code run on the WRDS cloud, typically data.tables, and creates the necessary graphs and visualizations.
 
 ```{r setup, include =FALSE}
 rm(list=ls())
@@ -16,7 +22,6 @@ library(data.table)
 library(zoo)
 ```
 
-## Load and polish data
 
 ```{r load data}
 #sin.frac.by.type <- readRDS(file = 'output/sin_frac_by_type_sep23.rds')

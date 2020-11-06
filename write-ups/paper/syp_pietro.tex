@@ -1,0 +1,133 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb, float}
+\usepackage{listings}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+%\usepackage{subcaption} alternative to subfig
+\usepackage[round]{natbib}
+\usepackage[english]{babel}
+\usepackage{marginnote}
+\usepackage{array}%for tables
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{subcaption}
+%\usepackage{caption}
+%\usepackage{siunitx}
+    
+
+%\usepackage{subfig}  %to align two figures side by side
+\usepackage{float}
+\usepackage[font={footnotesize}]{caption}  %to customize captions
+\usepackage[noorphans,font=itshape]{quoting}
+
+
+\numberwithin{equation}{section} %gets equation numbering follow the section
+\linespread{1.3}
+
+\graphicspath{{grafici/}}
+\setlength{\parindent}{1cm}
+\setlength{\parskip}{0.5cm plus4mm minus3mm}
+
+
+\AtBeginDocument{\renewcommand{\bibname}{References}} %to call bibliography references
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+ 
+ 
+\begin{document}
+ 
+% --------------------------------------------------------------
+%                         Start here
+% --------------------------------------------------------------
+ 
+\title{ Environmental, Social and Governance Factors in Finance \\ \vspace{3mm}
+\small A Literature Review \\ for PhD class by Professor Viral Acharya}
+\author{Pietro Reggiani}
+\date{\today}
+ 
+\maketitle
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\input{../../output/tables/sumtable1}
+\input{../../output/tables/sumtable2}
+\input{../../output/tables/sumtable3}
+
+
+%\input{../../output/tables/pre_nonfe_tab}
+
+Pre is until Feb 21st Crash is between then and March 20th, recovery is march 20th to August 7th.
+
+\input{../../output/tables/pre_fe_tab_enscore}
+\input{../../output/tables/crash_fe_tab_enscore}
+\newpage
+
+Plot the fixed effects here
+
+\begin{figure}[h!]
+\caption{Fixed Effects From Crash Change Regression (Feb 21st to March 20th)}
+\centering
+\includegraphics[scale=0.5]{../../output/charts/fixed_effects.png}
+\end{figure}
+
+203020 is Airlines, 253010 is Hotels Restaurants and Leisure, 101010 and 101020 are oil and gas, 301010 is food and staples retailing.
+
+\newpage
+
+\input{../../output/tables/recovery_fe_tab_enscore}
+
+
+
+%\input{../../output/tables/pre_fe_tab_enscore_weight_compact}
+%\input{../../output/tables/crash_fe_tab_enscore_weight_compact}
+%\input{../../output/tables/recovery_fe_tab_enscore_weight_compact}
+
+
+%\input{../../output/tables/pre_nonfe_tab_enscore}
+
+
+%\input{../../output/tables/post_fe_tab}
+%\input{../../output/tables/pre_fe_tab_day_before}
+
+
+\begin{figure}[h!]
+\caption{•}
+\centering
+\includegraphics[scale=0.7]{../../output/charts/MRNA.png}
+\end{figure}
+
+\begin{figure}[h!]
+\caption{•}
+\centering
+\includegraphics[scale=0.7]{../../output/charts/AAPL.png}
+\end{figure}
+
+\begin{figure}[h!]
+\caption{•}
+\centering
+\includegraphics[scale=0.7]{../../output/charts/HTZ.png}
+\end{figure}
+
+\begin{figure}[h!]
+\caption{•}
+\centering
+\includegraphics[scale=0.7]{../../output/charts/AAL.png}
+\end{figure}
+
+
+%\newpage
+%\nocite{*}
+%\bibliography{bibliography} 
+%\bibliographystyle{plainnat}
+ 
+ 
+\end{document}

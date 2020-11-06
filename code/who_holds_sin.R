@@ -275,33 +275,6 @@ for (i in 2:length(datebreaks)){
     
     mem_used()
     
-    ##########old piece #######################################
-    
-    #' Now we need to attach to the holdings information about the industry codes!
-    #' We can get this through CRSP I believe.
-    
-    # wanted.vars <- c("PRC","date","COMNAM", "TICKER","PERMNO","PERMCO","CUSIP","NCUSIP","SICCD","NAICS","SHRCD", "SHROUT")
-    # 
-    # crsp.data      <- fread('data/raw/crsp_monthly_aug27.csv', select = wanted.vars)
-    # 
-    # colnames(crsp.data) <- tolower(colnames(crsp.data))
-    # crsp.data <- unique(crsp.data)
-    # setnames(crsp.data, "date", "fdate")
-    # 
-    # 
-    # # extract the part that has no NCUSIP
-    # crsp.noncusip <- crsp.data[ncusip =='']
-    # crsp.data <- crsp.data[ncusip != '']
-    
-    ###
-    
-    # some cleaning and formatting
-    
-    #crsp.data$date <- list(as.Date(crsp.data$date, format = '%m/%d/%Y'))
-    
-    #this should be redundant now
-    #crsp.data <- crsp.data[ between(crsp.data$date, mindate, maxdate) ] #keep only dates in S34
-    
     
     #' ## Merge CRSP into holdings data.
     
@@ -468,9 +441,9 @@ for (i in 2:length(datebreaks)){
     #export table
     if (i ==2){
         #first time include row header with names
-        write.table(sin.frac.by.type, file = 'output/sin_frac_by_type3.csv', sep = ",", row.names = FALSE, quote = FALSE, col.names = TRUE)
+        fwrite(sin.frac.by.type, file = 'output/sin_frac_by_type3.csv', sep = ",", row.names = FALSE, quote = FALSE, col.names = TRUE)
     } else{
-        write.table(sin.frac.by.type, file = 'output/sin_frac_by_type3.csv', sep= ",", row.names = FALSE, quote = FALSE, col.names = FALSE , append = TRUE)
+        fwrite(sin.frac.by.type, file = 'output/sin_frac_by_type3.csv', sep= ",", row.names = FALSE, quote = FALSE, col.names = FALSE , append = TRUE)
     }
     
     

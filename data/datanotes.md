@@ -24,8 +24,16 @@ There is also a csv file that includes the CCM database quarterly from 1980 to 2
 ### Compustat
 Take NAICS (*naicsh*) from `comp.funda` which is at the annual frequency but for now it's good enough.
 
+The WRDS overview page for Compustat Capital IQ data can be found [here](https://wrds-www.wharton.upenn.edu/pages/support/manuals-and-overviews/compustat/north-america-global-bank/wrds-overview-compustat-north-america-global-bank/).
+
+The complete Compustat Xpressfeed online manual is [here](https://wrds-web.wharton.upenn.edu/wrds/support/Data/_001Manuals%20and%20Overviews/_001Compustat/_001North%20America%20-%20Global%20-%20Bank/_000dataguide/index.cfm).
+
+The instructions to compute total returns are in the Powerpoint file stored in the data dictionaries folder.
 
 ### WRDS Compustat-CRSP link instructions
+
+
+
 The WRDS overview page for CCM can be accessed [here](https://wrds-www.wharton.upenn.edu/pages/support/manuals-and-overviews/crsp/crspcompustat-merged-ccm/wrds-overview-crspcompustat-merged-ccm/).
 
 
@@ -158,5 +166,26 @@ Here they describe their approach to merging the holdings data, and which ones t
 >We merge the institutional holdings data with the CRSP-Compustat data by CUSIP number and drop any holdings that do not match (i.e., 13(f) securities whose share codesare not 10, 11, 12, or 18). We compute the dollar holding for each stock that an institution holds as price times shares held. Assets under management is the sum of dollar holdings foreach institution. We compute the portfolio weights as the ratio of dollar holdings to assets under management.
 
 I need to drop those that are not matched then!
+
+## Robintrack Data
+
+I found [this page](https://robinhood.com/us/en/support/articles/investments-you-can-make-on-robinhood/) that explains the universe of investable assets that are in Robinhood.
+
+
+### CRSP merging
+There is a file that has all the information of the firms in the daily stock file. It is the file called `crsp.dsfhdr`. I merge that to Robin using ticker.
+Ticker does not uniquely identify observations in CRSP, so when I merge it some assets from Robinhood are duplicated. In any case the fraction of duplicates seems 
+low, below 1 percent. Most of the duplicated obs are of share code 73 that indicates ETF's.
+
+My approach is, among the duplicates, to keep only ordinary common shares when there are available, otherwise just delete all duplicated observations.
+
+### Cleaning Choices
+
+* Keep only observations from ASSET4 that have a CUSIP (most are Canada and U.S.A.)
+* Discard the worst 10 percent of matches, judging by the discrepancy of the names of the companies after the merge.
+
+
+
+
 
 

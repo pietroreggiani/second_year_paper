@@ -1,0 +1,1455 @@
+---
+title: "Robinhood Analysis"
+output:  html_notebook
+author: Pietro Reggiani
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+---
+
+## Intro
+
+This is the outcome of within sector regressions of holdings on stock characteristics.
+ESG scores are never significant.
+
+Cross-section of holdings:
+
+* ESG scores are positively related to holdings
+* users tend to prefer large stocks with high liquidity buffers and low leverage.
+* return momentum is important
+
+Cross-section of changes in holdings:
+* during the crash:
+    * investors choose stocks with low cash and high prior trading volume.
+* during the recovery:
+    * investors chose large stocks with low market beta, high leverage and lower prior tradig volume.
+* in both periods users seem more attracted to stocks that have negative momentum (lower prior month returns)
+    
+    
+## Setup
+
+```{r setup, include=FALSE , eval = TRUE}
+
+#knitr::opts_knit$set(results='hide')
+knitr::opts_chunk$set(fig.width=9, fig.height=6, warning = FALSE) 
+knitr::opts_knit$set(root.dir = 'D:/Piter USB/PhD local folder/second_year_paper')
+setwd('D:/Piter USB/PhD local folder/second_year_paper')
+
+gc()
+remove(list= ls())
+
+# Load Packages
+
+library(data.table)
+setDTthreads(0)  #tells to use all available cores
+
+library(ggplot2)
+
+
+library(lubridate)
+library(dplyr)
+library(plyr)
+library(hrbrthemes)
+library(RColorBrewer)
+library(reshape2)
+library(knitr)
+library(tibble)
+library(fixest)
+#library(summarytools)
+library(vtable)
+library(broom)
+library(modelsummary)
+library(kableExtra)
+library(tictoc)
+library(collapse)
+library(DescTools)
+library(ggpubr)
+library(forcats)
+
+options(scipen=999)
+
+#functions folder
+source("code/funs_warehouse.r")
+
+# change global option about string import
+options(stringsAsFactors = FALSE)
+
+
+# Load data
+data <- fread(file = 'data/processed/final_dataset.csv' ,
+              header = TRUE,  data.table = TRUE , colClasses = list(Date = c("date", "date_funda")) )
+
+numobs <- dim(data)[1]
+numfirms <- length(unique(data$tic))
+
+
+mindate <- min(data$date)
+maxdate <- max(data$date)
+
+# drop last day as it creates problems
+data <- data[date < maxdate]
+maxdate <- max(data$date)
+
+
+# create sector indicators
+data[, fossil.gics := 0 + 1 * ( gindustry %in% c(101010, 101020 )  )  ]
+data[, sin.gics := 0 + 1 * (  gsubind %in% c( 30201010, 30201020, 30203010 , 25301010 )  )  ]
+data[, it.gics := 0 + 1 * (  gsector %in% c( 45 )  ) ]
+data[, airlines := 0 +1 * (gindustry == 203020) ]
+
+
+all.tickers <- sort(unique(data$ticker))
+
+```
+
+Sin above are brewers, distillers, tobacco, casinos
+
+```{r parameters, echo = FALSE}
+
+
+# pick only Fridays
+date.pre <- as.Date('2020-02-21')
+date.trough <- as.Date('2020-03-20')
+date.post <- as.Date('2020-08-07')
+
+dates <- c(date.pre, date.trough, date.post)
+
+# create indicators for crash and recovery periods
+data[, crash := 0 + between(date, date.pre, date.trough) * 1        ]
+data[, recovery := 0 + between(date, date.trough, date.post) * 1        ]
+
+#save all variable names
+data.variables <- sort(names(data))
+
+#choose folder for tables and plots export
+tables.folder <- 'output/tables'
+plots.folder <- 'output/charts'
+
+# set style preferences for exported tables
+myDict = c("log.mkt.cap" = "$\\ln(Market Cap)$",
+           "l(log.mkt.cap,1)" = "$\\ln(Market Cap)$",
+           "cash.assets" = "Cash / Assets",
+           "profitability" = "Profitability",
+           "leverage"= "Leverage",
+           "BM" = "Book/Market",
+           "beta" = "Market $\\beta$", 
+           "has.tresgs:TRESGS" = "ESG Score",
+           "has.enscore:ENSCORE" = "Environment Score",
+           "ret.mom" = "Return Momentum", 
+           "gindustry" = "Industry (gics-6)", 
+           "users_holding" = "Number of Users Holding Stock", 
+           "log.users" = "Log(Number of Users Holding Stock)",
+           "change" = "$\\Delta$ Log(Users Holding Stock)x100",
+           "log.weight" = "Log(Approximate Portfolio Weight)")
+
+new_style <- list(model = "title:", var= "title:", stats = "title:")
+
+setFixest_etable(fitstat = ~r2,  yesNo = "$\\checkmark$", dict = myDict, placement = "h!",
+                 style = new_style,
+                 drop = c("tot.users", "^has.tresgs$","^has.enscore$", "Intercept", "gsector", "^users_holding$", "^Number of Users Holding Stock$" ) )
+
+paper = FALSE
+
+
+```
+
+```{r calculate return during crash and recovery for each firm, include= FALSE, warning=FALSE}
+
+# the return is converted to an average daily return
+returns.crash <- data[between(date, date.pre, date.trough)] %>% 
+    select(ticker, exc.ret) %>% 
+    group_by(ticker) %>% 
+    summarize( ret.crash =  ( prod( 1 + exc.ret/100 )^(1/as.integer(date.trough-date.pre)) -1 ) *100   )
+
+returns.crash$quart.crash <- ntile(returns.crash$ret.crash , 4)
+
+returns.recovery <- data[between(date, date.trough, date.post)] %>% 
+    select(ticker, exc.ret) %>% 
+    group_by(ticker) %>% 
+    summarize( ret.recovery =  ( prod( 1 + exc.ret/100 )^(1/as.integer(date.post-date.trough)) -1 ) *100   )
+
+returns.recovery$quart.recovery <- ntile(returns.recovery$ret.recovery , 4)
+
+# they store both for each ticker, so you can add to other data later.
+
+data <- merge(data, returns.crash, by = 'ticker', all.x = TRUE)
+data <- merge(data, returns.recovery, by = 'ticker', all.x = TRUE)
+
+
+```
+
+```{r cross-section regression function, include=FALSE}
+
+reg.cs <- function(data.set , regressand, regressors, fe = TRUE){
+    
+    if (fe == TRUE){
+        f <- as.formula( paste(regressand,
+                            "~",
+                            paste( regressors, collapse=" + ") ,
+                            "|",
+                            "gindustry + date"  )    )
+        
+        model <-  feols( f , data.set , panel.id = ~ticker+date , mem.clean = TRUE ) 
+        
+    } else if (fe =="date"){
+        f <- as.formula( paste(regressand,
+                            "~",
+                            paste( regressors, collapse=" + "),
+                            "|",
+                            "date"  )  )
+        
+         model <- feols( f , data.set , panel.id = ~ticker+date , mem.clean = TRUE) 
+         
+    } else if(fe == "gindustry"){
+        
+        f <- as.formula( paste(regressand,
+                            "~",
+                            paste( regressors, collapse=" + "),
+                            "|",
+                            "gindustry"  )  )
+        
+        
+         model <- feols( f , data.set , panel.id = ~ticker+date , mem.clean = TRUE) 
+    } else {
+        f <- as.formula( paste(regressand,
+                            "~",
+                            paste( regressors, collapse=" + ")  )  )
+        
+        
+         model <- feols( f , data.set , panel.id = ~ticker+date , mem.clean = TRUE) 
+        
+        
+    }
+    
+    return( model )
+}
+
+```
+
+
+## Summary Statistics
+
+The following tables collect summary statistics for the variables in the data. Each table represents a snapshot at a particular date. The first date February 21st represents the market peak before the pandemic. March 23rd is the trough, right before the Fed's intervention on March 23rd. The last table instead is relative to the end of the sample in August, during the "recovery" phase.
+All Compustat financial variables are as of the end of 2019. TRESGS is the ESG score from Thomson Reuters, ENSCORE is the environmental sub-score. Those scores are relative to end of 2019 when available, end of 2018 otherwise.
+
+For some reason this summary table plotted with vtable is giving problems. **TODO FINISH THE FORMATTING**
+
+
+```{r summary stats levels, echo=FALSE, warning=FALSE}
+
+# choose method
+vtable = TRUE
+summarytools = FALSE
+
+# choose variables to include
+
+sumvars <- c('beta' ,  'bv', 'BM', 'log.mkt.cap', 'assets','cash.st', 'cash.assets' , 'com.shares.out', 'debt.current', 'debt.lt', 'leverage', 'profitability' , 'ENSCORE', 'TRESGS', 'TRESGCS', 'users_holding', 'frac.users', 'ret.mom', 'log.tv', 'ret.crash', 'ret.recovery')
+
+#preallocate memory
+tables <- list()
+length(tables) <- length(dates)
+
+if (summarytools){
+    stats = c('n.valid','min','q1', 'med', 'q3', 'max', 'sd') #for summarytools
+} else{
+    stats = c('NUnique','Min','P25', 'Median', 'P75', 'Max', 'SD')  #for modelsummary
+}
+
+
+for (i in 1:length(dates)){
+    
+    date.now <- dates[i]
+    
+    if(vtable){
+        
+        tables[[i]] <- st(data[date == date.now, ..sumvars], out = "kable" )
+        
+        st(data[date == date.now, ..sumvars], out = "latex",
+           file = paste( tables.folder, "/sumtable", as.character(i) , ".tex", sep = "") )
+            
+        #summarytools::descr(data[date == date.now, ..sumvars], stats = stats , transpose = TRUE,
+        #style = "rmarkdown", round.digits = 1) %>%  tb()
+        
+    } else {
+        
+        f <- as.formula( paste( paste(sumvars, collapse = "+") , "~", paste(stats, collapse = "+")   )     )
+        
+        datasummary( f  , data = data[date == date.now, ..sumvars] ,
+                     output = paste( tables.folder, "/sumtable", as.character(i) , ".tex", sep = "") ) 
+    }
+    
+    
+    
+}
+
+if (vtable){
+    print( tables[[1]])
+    cat('\n\n')
+    print( tables[[2]])
+    cat('\n\n')
+   print( tables[[3]])
+}
+
+
+   
+
+```
+
+new attempt using modelsummary package. The problem is that for some reason the command does not calculate some statistics.
+
+```{r summary stats levels 2, echo=FALSE, warning=FALSE}
+
+# choose variables to include
+
+sumvars <- c('beta' ,  'bv', 'BM', 'log.mkt.cap', 'assets','cash.st', 'cash.assets' , 'com.shares.out', 'debt.current', 'debt.lt', 'leverage', 'profitability' , 'ENSCORE', 'TRESGS', 'TRESGCS', 'users_holding', 'frac.users', 'ret.mom', 'log.tv')
+
+#preallocate memory
+tables <- list()
+length(tables) <- length(dates)
+
+stats = c('NUnique','Min','P25', 'Median', 'P75', 'Max', 'SD')  #for modelsummary
+
+
+for (i in 1:length(dates)){
+    
+    date.now <- dates[i]
+    
+    f <- as.formula( paste( paste(sumvars, collapse = "+") , "~", paste(stats, collapse = "+")   )     )
+    
+    datasummary( f  , data = data[date == date.now, ..sumvars] ,
+                     output = paste( tables.folder, "/sumtable", as.character(i) , ".tex", sep = "") ) 
+    
+}
+
+
+   
+
+```
+
+
+
+
+
+## Regressions TRESGS
+
+The following table displays results from regressions of the cross section of holdings at three different points in time. The regressand in three leftmost columns is the number of users, while is is the fraction of users in the following three. For each of the regressands, cross-sectional regressions are run at three dates: pre-pandemic peak in February, trough in March and recovery in August.
+
+*has.tresgs* is a dummy for whether the firm has an ESG score. Beta is calculated using daily returns in 2018. *ret.mom* is excess return in the preceding month, and *vol.mom* is the cumulative trading volume for that stock in the preceding month.
+
+
+### Cross-section Pre-pandemic
+
+Take the sample pre-pandemic and observe the characteristics of what they like to hold.
+
+
+**With Fixed Effects: Within Sector**
+
+
+```{r cross-section of users pre-pandemic with FE , echo = FALSE, warning=FALSE, message = FALSE}
+
+regressand <- 'users_holding'
+models <- list()
+variables <- c( 'has.tresgs' , 'TRESGS', 'log.assets', 'beta', 'cash.assets', 'leverage', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'frac.users')
+
+# do some increasing specifications
+
+regressors <- c( 'has.tresgs',  'has.tresgs:TRESGS' )
+models[[1]] <- reg.cs( data[ between(date, mindate, date.pre)  , ..variables ] , regressand, regressors  , fe = TRUE  )  
+
+regressors <- c( regressors , 'l(log.mkt.cap, 1)' )
+models[[2]] <- reg.cs( data[ between(date, mindate, date.pre)  , ..variables ] , regressand, regressors  , fe = TRUE  )  
+
+regressors <- c(regressors,  'cash.assets',  'leverage' )
+models[[3]] <-   reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+
+models  %>%  etable( se = "twoway",
+                     style = new_style,
+                     file = paste(tables.folder,"/pre_fe_tab.tex", sep = ""),
+                     title = "Pre-Covid Cross Section of Users", 
+                     replace = TRUE)
+
+
+```
+
+
+
+### Cross-section of changes Crash
+Here heteroskedasticity robust standard errors are enough because you no longer have a panel, it is truly a cross-section.
+
+This one below is good.
+
+```{r cross-section of changes pre to trough with FE , echo = FALSE}
+
+regressand <- 'users_holding'
+models <- list()
+variables <- c( 'has.tresgs' , 'TRESGS', 'log.assets', 'beta', 'cash.assets', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'leverage')
+dates.range <- c(date.pre, date.trough)
+
+
+changes <- data[date %in% dates.range ][order(ticker, date)][, .( change = 100* (.SD[2, get(regressand) ]- .SD[1, get(regressand) ])/ .SD[1,get(regressand)]),   by = ticker ] 
+
+# winsorize the changes at the 5 percent level
+changes$change <- Winsorize( changes$change,
+                        minval = quantile(changes$change, na.rm = TRUE, probs = 0.025) ,
+                        maxval = quantile(changes$change, na.rm = TRUE, probs = 1 - 0.025) ,
+                        na.rm = TRUE )
+    
+# add to data
+values <- merge( data[date==dates.range[1], ..variables], changes, by = 'ticker', nomatch = 0 )
+remove(changes)
+
+
+# do some increasing specifications
+regressors <- c( 'has.tresgs',  'has.tresgs:TRESGS', 'users_holding' )
+models[[1]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c( regressors , 'log.mkt.cap' )
+models[[2]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors,  'cash.assets',  'leverage' )
+models[[3]] <-   reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+
+models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/crash_fe_tab.tex", sep = ""),
+                     title = "Cross Section of Changes in Users during Market Crash", 
+                     replace = TRUE)
+
+
+fixedEffects <- fixef(models[[5]]) 
+plot(fixedEffects, n=7)
+
+
+```
+The airline industry and the hotels industry look like they are the ones that benefited the most.
+
+### Cross-section of changes Recovery
+
+```{r cross-section of changes trough to post with FE , echo = FALSE, warning=FALSE, message = FALSE}
+
+regressand <- 'users_holding'
+models <- list()
+variables <- c( 'has.tresgs' , 'TRESGS', 'log.assets', 'beta', 'cash.assets', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'leverage')
+dates.range <- c(date.trough, maxdate)
+
+
+changes <- data[date %in% dates.range ][order(ticker, date)][, .( change = 100* (.SD[2, get(regressand) ]- .SD[1, get(regressand) ])/ .SD[1,get(regressand)]),   by = ticker ] 
+
+# winsorize the changes at the 5 percent level
+changes$change <- Winsorize( changes$change,
+                        minval = quantile(changes$change, na.rm = TRUE, probs = 0.025) ,
+                        maxval = quantile(changes$change, na.rm = TRUE, probs = 1 - 0.025) ,
+                        na.rm = TRUE )
+    
+# add to data
+values <- merge( data[date==dates.range[1], ..variables], changes, by = 'ticker', nomatch = 0 )
+remove(changes)
+
+
+# do some increasing specifications
+regressors <- c( 'has.tresgs',  'has.tresgs:TRESGS', 'users_holding' )
+models[[1]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c( regressors , 'log.mkt.cap' )
+models[[2]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors,  'cash.assets',  'leverage' )
+models[[3]] <-   reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+
+models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/recovery_fe_tab.tex", sep = ""),
+                     title = "Cross Section of Changes in Users during Recovery", 
+                     replace = TRUE)
+
+fixedEffects <- fixef(models[[4]])
+plot(fixedEffects, n=10)
+
+
+```
+
+These three above are not bad, you can keep them as robustness checks. But the main results will be shown using the ENSCORE variable.
+
+
+
+## Regressions ENSCORE
+
+I will keep these three excluding the one without fixed effects. 
+
+The following regressions repeat the exercise but replacing the ESG score with the environmental pillar score only.
+
+
+### Cross-section Pre-pandemic
+
+Take the sample pre-pandemic and observe the characteristics of what they like to hold.
+
+**With Fixed Effects: Within Sector**
+
+This one is good I will keep it.
+
+```{r cross-section of users pre-pandemic with FE enscore, echo = FALSE, warning=FALSE, message = FALSE}
+
+regressand <- 'log.users'
+models <- list()
+variables <- c( 'has.enscore' , 'ENSCORE', 'log.assets', 'beta', 'cash.assets', 'leverage', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'frac.users', 'log.users')
+
+# do some increasing specifications
+regressors <- c( 'l(log.mkt.cap, 1)' )
+models[[1]] <- reg.cs( data[ between(date, mindate, date.pre)  , ..variables ] , regressand, regressors  , fe = TRUE  )  
+
+regressors <- c(regressors,  'cash.assets',  'leverage' )
+models[[2]] <- reg.cs( data[ between(date, mindate, date.pre)  , ..variables ] , regressand, regressors  , fe = TRUE  )  
+
+regressors <- c( regressors, 'has.enscore',  'has.enscore:ENSCORE' )
+models[[3]] <-   reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+if (paper){
+  models  %>%  etable( se = "twoway",
+                     style = new_style,
+                     file = paste(tables.folder,"/pre_fe_tab_enscore.tex", sep = ""),
+                     title = "Pre-Covid Cross Section of Users", 
+                     replace = TRUE)
+}else {
+  models  %>%  etable( se = "twoway",
+                     style = new_style,
+                     file = paste(tables.folder,"/pre_fe_tab_enscore.tex", sep = ""),
+                     replace = TRUE)
+}
+
+
+
+
+```
+
+
+
+### Cross-section of changes Crash
+
+```{r cross-section of changes pre to trough with FE enscore , echo = FALSE, warning=FALSE, message = FALSE}
+
+regressand <- 'log.users'
+models <- list()
+variables <- c( 'has.enscore' , 'ENSCORE', 'log.assets', 'beta', 'cash.assets', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'leverage', 'log.users')
+dates.range <- c(date.pre, date.trough)
+
+
+changes <- data[date %in% dates.range ][order(ticker, date)][, .( change = 100*(.SD[2, get(regressand) ] - .SD[1, get(regressand) ])),   by = ticker ] 
+
+# winsorize the changes at the 5 percent level
+changes$change <- Winsorize( changes$change,
+                        minval = quantile(changes$change, na.rm = TRUE, probs = 0.025) ,
+                        maxval = quantile(changes$change, na.rm = TRUE, probs = 1 - 0.025) ,
+                        na.rm = TRUE )
+    
+# add to data
+values <- merge( data[date==dates.range[1], ..variables], changes, by = 'ticker', nomatch = 0 )
+remove(changes)
+
+
+# do some increasing specifications
+regressors <- c('log.mkt.cap', 'log.users' )
+models[[1]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c( regressors ,  'cash.assets',  'leverage')
+models[[2]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors,    'has.enscore',  'has.enscore:ENSCORE' )
+models[[3]] <-   reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+if (paper){
+  models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/crash_fe_tab_enscore.tex", sep = ""),
+                     title = "Cross Section of Changes in Users during Market Crash", 
+                     replace = TRUE)
+
+} else {
+  models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/crash_fe_tab_enscore.tex", sep = ""),
+                     replace = TRUE)
+}
+
+
+
+
+
+
+```
+The airline industry and the hotels industry look like they are the ones that benefited the most.
+
+### Cross-section of changes Recovery
+
+```{r cross-section of changes trough to post with FE enscore , echo = FALSE, warning=FALSE, message = FALSE}
+
+regressand <- 'log.users'
+models <- list()
+variables <- c( 'has.enscore' , 'ENSCORE', 'log.assets', 'beta', 'cash.assets', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'leverage', 'log.users')
+dates.range <- c(date.trough, maxdate)
+
+
+changes <- data[date %in% dates.range ][order(ticker, date)][, .( change = 100*(.SD[2, get(regressand) ]- .SD[1, get(regressand) ])),   by = ticker ] 
+
+# winsorize the changes at the 5 percent level
+changes$change <- Winsorize( changes$change,
+                        minval = quantile(changes$change, na.rm = TRUE, probs = 0.025) ,
+                        maxval = quantile(changes$change, na.rm = TRUE, probs = 1 - 0.025) ,
+                        na.rm = TRUE )
+    
+# add to data
+values <- merge( data[date==dates.range[1], ..variables], changes, by = 'ticker', nomatch = 0 )
+remove(changes)
+
+
+# do some increasing specifications
+regressors <- c('log.mkt.cap', 'log.users' )
+models[[1]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c( regressors ,  'cash.assets',  'leverage')
+models[[2]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors,    'has.enscore',  'has.enscore:ENSCORE' )
+models[[3]] <-   reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+
+if (paper){
+  models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/recovery_fe_tab_enscore.tex", sep = ""),
+                     title = "Cross Section of Changes in Users during Recovery", 
+                     replace = TRUE) 
+} else {
+  models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/recovery_fe_tab_enscore.tex", sep = ""),
+                     replace = TRUE)
+  }
+
+
+
+
+```
+
+## Weight Regressions ENSCORE
+
+These three chunks do exactly the same thing but using approximate portfolio weights instead of log users. Will not include in the presentation but results are not bad. Consider keeping for robustness but likely will scrap.
+
+### Pre Pandemic Cross Section
+
+```{r cross-section of users pre-pandemic with FE enscore weight, echo = FALSE, warning=FALSE, message = FALSE}
+
+regressand <- 'log.weight'
+models <- list()
+variables <- c( 'has.enscore' , 'ENSCORE', 'log.assets', 'beta', 'cash.assets', 'leverage', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'frac.users', 'log.users', 'log.weight')
+
+# do some increasing specifications
+regressors <- c( 'l(log.mkt.cap, 1)' )
+models[[1]] <- reg.cs( data[ between(date, mindate, date.pre)  , ..variables ] , regressand, regressors  , fe = TRUE  )  
+
+regressors <- c(regressors,  'cash.assets',  'leverage' )
+models[[2]] <- reg.cs( data[ between(date, mindate, date.pre)  , ..variables ] , regressand, regressors  , fe = TRUE  )  
+
+regressors <- c( regressors, 'has.enscore',  'has.enscore:ENSCORE' )
+models[[3]] <-   reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( data[between(date, mindate, date.pre) , ..variables ] , regressand, regressors  , fe = TRUE  ) 
+
+if (paper){
+  models  %>%  etable( se = "twoway",
+                     style = new_style,
+                     file = paste(tables.folder,"/pre_fe_tab_enscore_weight.tex", sep = ""),
+                     title = "Pre-Covid Cross Section of Users", 
+                     replace = TRUE)
+}else {
+  models  %>%  etable( se = "twoway",
+                     style = new_style,
+                     file = paste(tables.folder,"/pre_fe_tab_enscore_weight_compact.tex", sep = ""),
+                     replace = TRUE)
+}
+
+
+
+
+```
+
+
+
+### Cross-section of changes Crash
+
+```{r cross-section of changes pre to trough with FE enscore weight , echo = FALSE, warning=FALSE, message = FALSE}
+
+regressand <- 'log.weight'
+models <- list()
+variables <- c( 'has.enscore' , 'ENSCORE', 'log.assets', 'beta', 'cash.assets', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'leverage', 'log.weight')
+dates.range <- c(date.pre, date.trough)
+
+
+changes <- data[date %in% dates.range ][order(ticker, date)][, .( change = 100*(.SD[2, get(regressand) ] - .SD[1, get(regressand) ])),   by = ticker ] 
+
+# winsorize the changes at the 5 percent level
+changes$change <- Winsorize( changes$change,
+                        minval = quantile(changes$change, na.rm = TRUE, probs = 0.025) ,
+                        maxval = quantile(changes$change, na.rm = TRUE, probs = 1 - 0.025) ,
+                        na.rm = TRUE )
+    
+# add to data
+values <- merge( data[date==dates.range[1], ..variables], changes, by = 'ticker', nomatch = 0 )
+remove(changes)
+
+
+# do some increasing specifications
+regressors <- c('log.mkt.cap', 'log.weight' )
+models[[1]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c( regressors ,  'cash.assets',  'leverage')
+models[[2]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors,    'has.enscore',  'has.enscore:ENSCORE' )
+models[[3]] <-   reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+if (paper){
+  models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/crash_fe_tab_enscore_weight.tex", sep = ""),
+                     title = "Cross Section of Changes in Users during Market Crash", 
+                     replace = TRUE)
+
+} else {
+  models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/crash_fe_tab_enscore_weight_compact.tex", sep = ""),
+                     replace = TRUE)
+}
+
+
+
+
+
+
+```
+The airline industry and the hotels industry look like they are the ones that benefited the most.
+
+### Cross-section of changes Recovery
+
+```{r cross-section of changes trough to post with FE enscore weight , echo = FALSE, warning=FALSE, message = FALSE}
+
+regressand <- 'log.weight'
+models <- list()
+variables <- c( 'has.enscore' , 'ENSCORE', 'log.assets', 'beta', 'cash.assets', 'profitability', 'ret.mom',   'gindustry', 'crash', 'recovery', 'log.mkt.cap', 'BM', 'vol.mom','vol.mom.6m',  'ticker', 'date', 'users_holding', 'tot.users', 'fossil', 'sin', 'it.gics', 'airlines', 'gsector', 'leverage', 'log.weight')
+dates.range <- c(date.trough, maxdate)
+
+
+changes <- data[date %in% dates.range ][order(ticker, date)][, .( change = 100*(.SD[2, get(regressand) ]- .SD[1, get(regressand) ])),   by = ticker ] 
+
+# winsorize the changes at the 5 percent level
+changes$change <- Winsorize( changes$change,
+                        minval = quantile(changes$change, na.rm = TRUE, probs = 0.025) ,
+                        maxval = quantile(changes$change, na.rm = TRUE, probs = 1 - 0.025) ,
+                        na.rm = TRUE )
+    
+# add to data
+values <- merge( data[date==dates.range[1], ..variables], changes, by = 'ticker', nomatch = 0 )
+remove(changes)
+
+
+# do some increasing specifications
+regressors <- c('log.mkt.cap', 'log.weight' )
+models[[1]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c( regressors ,  'cash.assets',  'leverage')
+models[[2]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors,    'has.enscore',  'has.enscore:ENSCORE' )
+models[[3]] <-   reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'BM', 'beta', 'profitability' )
+models[[4]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+regressors <- c(regressors, 'ret.mom' )
+models[[5]] <- reg.cs( values , 'change', regressors  , fe = "gindustry"  ) 
+
+
+if (paper){
+  models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/recovery_fe_tab_enscore_weight.tex", sep = ""),
+                     title = "Cross Section of Changes in Users during Recovery", 
+                     replace = TRUE) 
+} else {
+  models  %>%  etable( se = "hetero", 
+                     style = new_style,
+                     file = paste(tables.folder,"/recovery_fe_tab_enscore_weight_compact.tex", sep = ""),
+                     replace = TRUE)
+  }
+
+
+
+
+```
+
+
+
+
+
+
+
+## Plots 
+
+### Changes Across Sectors
+
+Plot the changes across sectors for different industries.
+
+**Crash**
+
+Notice that you do not really know the fraction of users! Do the change in the average number of users for each stock in each sector.
+
+```{r bar chart winner loser sectors crash, echo = FALSE}
+
+dates.range <- c(date.pre, date.trough)
+
+#tot.post <- data[date == dates.range[2], sum(users_holding*price.close, na.rm = TRUE) ]
+users.post <- data[date == dates.range[2] , .( post = mean( users_holding , na.rm = TRUE)  ) , by = gindustry ]
+ 
+#tot.pre <- data[date == dates.range[1], sum(users_holding*price.close, na.rm = TRUE) ]
+users.pre <- data[date == dates.range[1] , .( pre = mean( users_holding , na.rm = TRUE)  ) , by = gindustry ]
+ 
+industries <- merge(users.pre, users.post, by = 'gindustry', nomatch = 0)
+remove(users.pre, users.post)
+
+ 
+industries[, gindustry := as.factor(gindustry)]
+industries[, change := 100*(post - pre)/pre]
+
+industries[, mean.change := mean( industries$change , na.rm = TRUE) ]
+
+industries[, change.demean := change - mean.change ]
+
+industries<- industries[order(change)]
+
+# keep top and bottom of the pack
+keepnum <- 7
+
+plot.group <- industries[ c(1:keepnum , (length(industries$gindustry)-keepnum+1):length(industries$gindustry)  )  ]
+plot.group[, winner := as.factor(change.demean >0) ]
+
+plot.group$gindustry <- plot.group$gindustry %>% revalue( c( "203020" = "Airlines",
+                                                             "253010" = "Hotels, Restaurants & Leisure",
+                                                             "101010" = "Energy Equipment & Services",
+                                                             "101020" = "Oil, Gas & Consumable Fuels",
+                                                             "201020" = "Building Products",
+                                                             "352010" = "Biotechnology",
+                                                             "303010" = "Household Products",
+                                                             "551040" = "Water Utilities",
+                                                             "452030" = "Electronic Equipment",
+                                                             "302030" = "Tobacco",
+                                                             "551010" = "Electric Utilities",
+                                                             "453010" = "Semiconductors & Components",
+                                                             "501020" = "Wireless Telecommunication Services",
+                                                             "551050" = "Indep. Power & Renewable Electricity",
+                                                             "203030" = "Maritime Transport",
+                                                             "252020" = "Leisure Products",
+                                                             "251010" = "Auto Components",
+                                                             "203050" = "Transportation Infrastructure",
+                                                             "255010" = "Retailing Distributors",
+                                                             "352020" = "Pharmaceuticals",
+                                                             "201070" = "Cap. Goods Trading & Distributors",
+                                                             "351030" = "Health Care Technology",
+                                                             "301010" = "Food and Staples Retailing",
+                                                             "203010" = "Air Freight & Logistics")  )
+
+# Bar plot
+plot.group %>%  mutate(gindustry = fct_reorder(gindustry, change)) %>%
+  ggplot(aes(x=gindustry, y= change.demean , fill = winner) ) + 
+  geom_bar(stat = "identity",  alpha=.6, width=.4) +
+  coord_flip() + theme_ipsum()+
+  scale_fill_manual(values = c("red3", "green4") )+
+  theme(legend.position = "none")+
+  xlab("") + ylab("Sector Avg. % Change in # of Users (demeaned)") +
+  ylim(c( min(plot.group$change.demean) - 20 , max(plot.group$change.demean) +1  ) )+
+  ggtitle("Winners and Losers \n by Change in Popularity (Crash)" )+
+  labs(caption = paste("Mean % Change is ", floor(industries[1,mean.change]), "%", sep = ""))
+
+ggsave(paste(plots.folder, "/sectors_crash.png", sep = ""))
+
+```
+
+**Recovery**
+
+```{r bar chart winner loser sectors recovery, echo = FALSE}
+
+dates.range <- c(date.trough, date.post)
+
+#tot.post <- data[date == dates.range[2], sum(users_holding*price.close, na.rm = TRUE) ]
+users.post <- data[date == dates.range[2] , .( post = mean( users_holding , na.rm = TRUE)  ) , by = gindustry ]
+ 
+#tot.pre <- data[date == dates.range[1], sum(users_holding*price.close, na.rm = TRUE) ]
+users.pre <- data[date == dates.range[1] , .( pre = mean( users_holding , na.rm = TRUE)  ) , by = gindustry ]
+ 
+industries <- merge(users.pre, users.post, by = 'gindustry', nomatch = 0)
+remove(users.pre, users.post)
+
+ 
+industries[, gindustry := as.factor(gindustry)]
+industries[, change := 100*(post - pre)/pre]
+
+industries[, mean.change := mean( industries$change , na.rm = TRUE) ]
+
+industries[, change.demean := change - mean.change ]
+
+industries<- industries[order(change)]
+
+# keep top and bottom of the pack
+keepnum <- 7
+
+plot.group <- industries[ c(1:keepnum , (length(industries$gindustry)-keepnum+1):length(industries$gindustry)  )  ]
+plot.group[, winner := as.factor(change.demean >0) ]
+
+plot.group$gindustry <- plot.group$gindustry %>% revalue( c( "203020" = "Airlines",
+                                                             "253010" = "Hotels, Restaurants & Leisure",
+                                                             "101010" = "Energy Equipment & Services",
+                                                             "101020" = "Oil, Gas & Consumable Fuels",
+                                                             "201020" = "Building Products",
+                                                             "352010" = "Biotechnology",
+                                                             "303010" = "Household Products",
+                                                             "551040" = "Water Utilities",
+                                                             "452030" = "Electronic Equipment",
+                                                             "302030" = "Tobacco",
+                                                             "551010" = "Electric Utilities",
+                                                             "453010" = "Semiconductors & Components",
+                                                             "501020" = "Wireless Telecommunication Services",
+                                                             "551050" = "Indep. Power & Renewable Electricity",
+                                                             "203030" = "Maritime Transport",
+                                                             "252020" = "Leisure Products",
+                                                             "251010" = "Auto Components",
+                                                             "203050" = "Transportation Infrastructure",
+                                                             "255010" = "Retailing Distributors",
+                                                             "352020" = "Pharmaceuticals",
+                                                             "201070" = "Cap. Goods Trading & Distributors",
+                                                             "351030" = "Health Care Technology",
+                                                             "301010" = "Food and Staples Retailing",
+                                                             "203010" = "Air Freight & Logistics",
+                                                             "253020" = "Diversified Consumer Services",
+                                                             "302020" = "Food Products" )  )
+
+# Bar plot
+plot.group %>%  mutate(gindustry = fct_reorder(gindustry, change)) %>%
+  ggplot(aes(x=gindustry, y= change.demean , fill = winner) ) + 
+  geom_bar(stat = "identity",  alpha=.6, width=.4) +
+  coord_flip() + theme_ipsum()+
+  scale_fill_manual(values = c("red3", "green4") )+
+  theme(legend.position = "none")+
+  xlab("") + ylab("Industry Avg. % Change in # of Users (demeaned)") +
+  ylim(c( min(plot.group$change.demean) - 20 , max(plot.group$change.demean) +1  ) )+
+  ggtitle("Best and Worst Industries \n by Change in Popularity (Recovery)" )+
+  labs(caption = paste("Mean % Change is ", floor(industries[1,mean.change]), "%", sep = ""))
+
+ggsave(paste(plots.folder, "/sectors_recovery.png", sep = ""))
+
+```
+### Sector Changes Weight
+
+Do the same thing but instead of the change in log users use the approximate portfolio weight. It looks similar but necessarily you will overweight the sectors whose price boomed during the period. For instance healthcare retail and stuff like that.
+I will keep the users in the presentation, but will mention that I tried also with the weights and it did not make a difference.
+These below will likely not appear in the paper then.
+
+
+**Crash**
+
+Notice that you do not really know the fraction of users! Do the change in the average number of users for each stock in each sector
+
+```{r bar chart winner loser sectors crash weight, echo = FALSE}
+
+dates.range <- c(date.pre, date.trough)
+
+#tot.post <- data[date == dates.range[2], sum(users_holding*price.close, na.rm = TRUE) ]
+users.post <- data[date == dates.range[2] , .( post = sum( weight , na.rm = TRUE)  ) , by = gindustry ]
+ 
+#tot.pre <- data[date == dates.range[1], sum(users_holding*price.close, na.rm = TRUE) ]
+users.pre <- data[date == dates.range[1] , .( pre = sum( weight , na.rm = TRUE)  ) , by = gindustry ]
+ 
+industries <- merge(users.pre, users.post, by = 'gindustry', nomatch = 0)
+remove(users.pre, users.post)
+
+ 
+industries[, gindustry := as.factor(gindustry)]
+industries[, change := 100*(post - pre)/pre]
+
+industries[, mean.change := mean( industries$change , na.rm = TRUE) ]
+
+industries[, change.demean := change - mean.change ]
+
+industries<- industries[order(change)]
+
+# keep top and bottom of the pack
+keepnum <- 7
+
+plot.group <- industries[ c(1:keepnum , (length(industries$gindustry)-keepnum+1):length(industries$gindustry)  )  ]
+plot.group[, winner := as.factor(change.demean >0) ]
+
+plot.group$gindustry <- plot.group$gindustry %>% revalue( c( "203020" = "Airlines",
+                                                             "253010" = "Hotels, Restaurants & Leisure",
+                                                             "101010" = "Energy Equipment & Services",
+                                                             "101020" = "Oil, Gas & Consumable Fuels",
+                                                             "201020" = "Building Products",
+                                                             "352010" = "Biotechnology",
+                                                             "303010" = "Household Products",
+                                                             "551040" = "Water Utilities",
+                                                             "452030" = "Electronic Equipment",
+                                                             "302030" = "Tobacco",
+                                                             "551010" = "Electric Utilities",
+                                                             "453010" = "Semiconductors & Components",
+                                                             "501020" = "Wireless Telecommunication Services",
+                                                             "551050" = "Indep. Power & Renewable Electricity",
+                                                             "203030" = "Maritime Transport",
+                                                             "252020" = "Leisure Products",
+                                                             "251010" = "Auto Components",
+                                                             "251020" = "Automobiles",
+                                                             "203050" = "Transportation Infrastructure",
+                                                             "255010" = "Retailing Distributors",
+                                                             "352020" = "Pharmaceuticals",
+                                                             "201070" = "Cap. Goods Trading & Distributors",
+                                                             "351030" = "Health Care Technology",
+                                                             "301010" = "Food and Staples Retailing",
+                                                             "203010" = "Air Freight & Logistics",
+                                                             "352030" = "Life Sciences Tools & Services",
+                                                             "151020" = "Construction Materials",
+                                                             "201040" = "Indus. Electrical Equipment",
+                                                             "601020" = "Real Estate Mgt & Dev.",
+                                                             "255020" = "Internet & Marketing Retail",
+                                                             "253020" = "Diversified Consumer Services",
+                                                             "201050" = "Industrial Conglomerates",
+                                                             "501010" = "Telecommunication Services")  )
+
+# Bar plot
+plot.group %>%  mutate(gindustry = fct_reorder(gindustry, change)) %>%
+  ggplot(aes(x=gindustry, y= change.demean , fill = winner) ) + 
+  geom_bar(stat = "identity",  alpha=.6, width=.4) +
+  coord_flip() + theme_ipsum()+
+  scale_fill_manual(values = c("red3", "green4") )+
+  theme(legend.position = "none")+
+  xlab("") + ylab("% Change in Approx. Portfolio weight (demeaned)") +
+  ylim(c( min(plot.group$change.demean) - 20 , max(plot.group$change.demean) +1  ) )+
+  ggtitle("Best and Worst Industries by Change in Portfolio Weight - Crash" )+
+  labs(caption = paste("Mean % Change is ", floor(industries[1,mean.change]), "%", sep = ""))
+
+
+
+```
+
+**Recovery**
+
+```{r bar chart winner loser sectors recovery weight, echo = FALSE}
+
+dates.range <- c(date.trough, date.post)
+
+#tot.post <- data[date == dates.range[2], sum(users_holding*price.close, na.rm = TRUE) ]
+users.post <- data[date == dates.range[2] , .( post = sum( weight , na.rm = TRUE)  ) , by = gindustry ]
+ 
+#tot.pre <- data[date == dates.range[1], sum(users_holding*price.close, na.rm = TRUE) ]
+users.pre <- data[date == dates.range[1] , .( pre = sum( weight , na.rm = TRUE)  ) , by = gindustry ]
+ 
+industries <- merge(users.pre, users.post, by = 'gindustry', nomatch = 0)
+remove(users.pre, users.post)
+
+ 
+industries[, gindustry := as.factor(gindustry)]
+industries[, change := 100*(post - pre)/pre]
+
+industries[, mean.change := mean( industries$change , na.rm = TRUE) ]
+
+industries[, change.demean := change - mean.change ]
+
+industries<- industries[order(change)]
+
+# keep top and bottom of the pack
+keepnum <- 7
+
+plot.group <- industries[ c(1:keepnum , (length(industries$gindustry)-keepnum+1):length(industries$gindustry)  )  ]
+plot.group[, winner := as.factor(change.demean >0) ]
+
+plot.group$gindustry <- plot.group$gindustry %>% revalue( c( "203020" = "Airlines",
+                                                             "253010" = "Hotels, Restaurants & Leisure",
+                                                             "101010" = "Energy Equipment & Services",
+                                                             "101020" = "Oil, Gas & Consumable Fuels",
+                                                             "201020" = "Building Products",
+                                                             "352010" = "Biotechnology",
+                                                             "303010" = "Household Products",
+                                                             "551040" = "Water Utilities",
+                                                             "452030" = "Electronic Equipment",
+                                                             "302030" = "Tobacco",
+                                                             "551010" = "Electric Utilities",
+                                                             "453010" = "Semiconductors & Components",
+                                                             "501020" = "Wireless Telecommunication Services",
+                                                             "551050" = "Indep. Power & Renewable Electricity",
+                                                             "203030" = "Maritime Transport",
+                                                             "252020" = "Leisure Products",
+                                                             "251010" = "Auto Components",
+                                                             "251020" = "Automobiles",
+                                                             "203050" = "Transportation Infrastructure",
+                                                             "255010" = "Retailing Distributors",
+                                                             "352020" = "Pharmaceuticals",
+                                                             "201070" = "Cap. Goods Trading & Distributors",
+                                                             "351030" = "Health Care Technology",
+                                                             "301010" = "Food and Staples Retailing",
+                                                             "203010" = "Air Freight & Logistics",
+                                                             "352030" = "Life Sciences Tools & Services",
+                                                             "151020" = "Construction Materials",
+                                                             "201040" = "Indus. Electrical Equipment",
+                                                             "601020" = "Real Estate Mgt & Dev.",
+                                                             "255020" = "Internet & Marketing Retail",
+                                                             "253020" = "Diversified Consumer Services",
+                                                             "201050" = "Industrial Conglomerates",
+                                                             "501010" = "Telecommunication Services")  )
+
+# Bar plot
+plot.group %>%  mutate(gindustry = fct_reorder(gindustry, change)) %>%
+  ggplot(aes(x=gindustry, y= change.demean , fill = winner) ) + 
+  geom_bar(stat = "identity",  alpha=.6, width=.4) +
+  coord_flip() + theme_ipsum()+
+  scale_fill_manual(values = c("red3", "green4") )+
+  theme(legend.position = "none")+
+  xlab("") + ylab("% Change in Approx. Portfolio weight (demeaned)") +
+  ylim(c( min(plot.group$change.demean) - 20 , max(plot.group$change.demean) +1  ) )+
+  ggtitle("Best and Worst Industries by Change in Portfolio Weight - Recovery" )+
+  labs(caption = paste("Mean % Change is ", floor(industries[1,mean.change]), "%", sep = ""))
+
+
+
+```
+
+
+
+
+### Histograms of number of users holding a stock
+
+These are needed to figure out whether I need to take logs of data or not. Not for paper.
+
+```{r histogram users holding, echo = FALSE, eval=FALSE}
+
+hist(data$log.users) %>% print()
+hist(data$users_holding) %>% print()
+
+firm <- 'HTZ'
+
+data[ticker == firm, users_holding] %>% hist(n = 100, main = "Users") %>% print()
+data[ticker == firm, log(users_holding)] %>% hist(n = 100, main = "Log Users") %>% print()
+data[ticker == firm, frac.users] %>% hist(n = 100, main = "Fraction of Users") %>% print()
+data[ticker == firm, log.frac] %>% hist(n = 100, main = "Log of Fraction of Users") %>% print()
+
+
+
+
+
+```
+
+
+### Total Number of Users over time
+
+```{r total users}
+
+start.date <- as.Date('2019-07-01')
+
+values <- data[ between(date, start.date, maxdate), .(tot.users = .SD[1,tot.users] , value = .SD[, sum(users_holding*price.close, na.rm = TRUE)] ), by = date]
+
+ggplot(values, aes(x=date)) +
+    geom_line(aes(y= tot.users/1000000 ), size = 1.1, color= "green4" ) +
+    ylab("Millions Users") +  theme_ipsum() +
+    theme(plot.margin = unit( c(0,0.3,0.3,0.3), "lines" ) , axis.title.x = element_blank()) +
+    ggtitle("Number of Users on Platform - Lower Bound")+
+  labs(caption = "Number of users holding most widely held stock each day")+
+  geom_rect(aes( xmin = date.pre, xmax = date.trough  , ymin=0.4 , ymax = Inf ) , fill = "red", alpha = 0.005  )+
+  geom_text(
+         aes(x = as.Date("2019-12-01"), y = 0.8, label = "Covid Crash\n Feb21-Mar20"),
+         size = 4, vjust = 0, hjust = 0, color = "red"
+       )+
+  geom_rect(aes( xmin = date.trough, xmax = date.post  , ymin=0.4 , ymax = Inf ) , fill = "green", alpha = 0.005  )+
+  geom_text(
+         aes(x = as.Date("2020-06-01"), y = 0.45, label = "Recovery\n Mar20-Aug7"),
+         size = 4, vjust = 0, hjust = 0, color = "green4"
+       ) + ylim(c(0.4,1))
+  
+ggsave(paste(plots.folder,"/users.png", sep = ""))
+
+ggplot(values, aes(x=date)) +
+    geom_line(aes(y= value/1000000 ), size = 1.1, color = "green4" ) +
+    ylab("$ Millions") +  theme_ipsum() +
+    theme(plot.margin = unit( c(0,0.3,0.3,0.3), "lines" ) , axis.title.x = element_blank())+
+  ggtitle("Total Value of Robinhood Sample - Approximate") +
+  labs(caption = "Assumes each user holds one share of each company.") +
+  geom_rect(aes( xmin = date.pre, xmax = date.trough  , ymin=0 , ymax = Inf ) , fill = "red", alpha = 0.005  )+
+  geom_text(
+         aes(x = as.Date("2019-12-01"), y = 4000, label = "Covid Crash \n Feb21-Mar20"),
+         size = 4, vjust = 0, hjust = 0, color = "red"
+       )+
+  geom_rect(aes( xmin = date.trough, xmax = date.post  , ymin=0 , ymax = Inf ) , fill = "green", alpha = 0.005  )+
+  geom_text(
+         aes(x = as.Date("2020-06-01"), y = 1500, label = "Recovery \n Mar20-Aug7"),
+         size = 4, vjust = 0, hjust = 0, color = "green4"
+       )
+
+ggsave(paste(plots.folder,"/value.png", sep = ""))
+
+```
+
+
+
+### user changes for some particular firms
+
+The following chunk creates and saves plots of number of users and price per firm for some chosen date period. Usefule as exampples
+
+```{r single firms plot fraction, echo=FALSE, warning=FALSE, message=FALSE}
+
+first.date <- date.pre
+last.date <- date.post
+temperatureColor <- "#69b3a2"
+usercolor <- rgb(0.3, 0.3, 0.4,1)
+priceColor <- rgb(0.2, 0.6, 0.9, 1)
+
+firms <- c('AAPL', 'HTZ', 'MRNA', 'MSFT', 'DAL', 'AAL',  'COTY', 'CCL', 'GOOGL', 'TSLA' , 'AMZN')
+
+plots <- list()
+
+for (i in 1:length(firms)){
+  
+  values <- data[ticker == firms[i] & between(date, first.date, last.date) , .(date, users_holding, price.close, tot.users, frac.users)]
+  
+  #users.normaliz <- values[date == first.date, users_holding]
+  
+  #frac.normaliz <- values[date == first.date, frac.users]
+  
+  name <- data[ ticker == firms[i] , conm ] %>% unique()
+  maxlength <- min(13, nchar(name))
+  name <- substr(name, 1, maxlength)
+  
+  #price.adjust <- values[date == first.date, price.close]
+  
+  users <- ggplot(values, aes(x=date)) +
+    geom_line( aes(y= users_holding/1000, color = "Thousands of Users" ), size=1.1) + 
+    theme_ipsum() +
+    theme(legend.position=c(0.15,0.75),
+          axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = unit( c(0,0.3,0.3,0.3), "lines") ) +
+    scale_color_discrete(name="")+
+    ylab(paste("Thousands of Users Holding Stock"))
+  
+  price <- ggplot(values, aes(x=date)) +
+    geom_line(aes(y= price.close ), size = 1.1 ) +
+    ylab("Price $") +  theme_ipsum() +
+    theme(plot.margin = unit( c(0,0.3,0.3,0.3), "lines" ) , axis.title.x = element_blank()) 
+  
+  plots[[i]] <- ggarrange(users, price, nrow = 2, ncol = 1, align = "hv") %>% annotate_figure(top = text_grob(paste("Users and Price Progression -", name) ) )
+  
+  plots[[i]] %>% ggexport( filename = paste(plots.folder,"/", firms[i],".png"  ,sep = ""), width = 1600, height = 1200, res= 250   )
+    
+  print(plots[[i]])
+  
+}
+
+
+
+```
+
+### Portfolio weight changes
+
+These look quite good, not sure if i want these or the previous ones in the paper.
+
+```{r single firms plot portfolio weights, echo=FALSE, warning=FALSE, message=FALSE}
+
+first.date <- date.pre
+last.date <- date.post
+temperatureColor <- "#69b3a2"
+usercolor <- rgb(0.3, 0.3, 0.4,1)
+priceColor <- rgb(0.2, 0.6, 0.9, 1)
+
+firms <- c('AAPL', 'HTZ', 'MRNA', 'MSFT', 'DAL', 'AAL',  'COTY', 'CCL', 'GOOGL', 'TSLA' )
+
+plots <- list()
+
+for (i in 1:length(firms)){
+  
+  values <- data[ticker == firms[i] & between(date, first.date, last.date) ,
+                 .(date, users_holding, price.close, tot.users, frac.users, weight)]
+  
+  normaliz <- values[date == first.date, weight]
+  
+  #frac.normaliz <- values[date == first.date, frac.users]
+  
+  name <- data[ ticker == firms[i] , conm ] %>% unique()
+  maxlength <- min(13, nchar(name))
+  name <- substr(name, 1, maxlength)
+  
+  #price.adjust <- values[date == first.date, price.close]
+  
+  users <- ggplot(values, aes(x=date)) +
+    geom_line( aes(y=  weight , color = "% of Users" ), size=1.1) + 
+    theme_ipsum() +
+    theme(legend.position=c(0.15,0.75),
+          axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.margin = unit( c(0,0.3,0.3,0.3), "lines") ) +
+    scale_color_discrete(name="")+
+    ylab(paste("Approx. Portfolio Weight %"))
+  
+  price <- ggplot(values, aes(x=date)) +
+    geom_line(aes(y= price.close ), size = 1.1 ) +
+    ylab("Closing Price $") +  theme_ipsum() +
+    theme(plot.margin = unit( c(0,0.3,0.3,0.3), "lines" ) , axis.title.x = element_blank()) 
+  
+  plots[[i]] <- ggarrange(users, price, nrow = 2, ncol = 1, align = "hv") %>% annotate_figure(top = text_grob(paste("Users and Price Progression -", name) ) )
+  
+  plots[[i]] %>% ggexport( filename = paste(plots.folder,"/", firms[i],"_weight.png"  ,sep = ""), width = 1600, height = 1200, res= 250   )
+    
+  print(plots[[i]])
+  
+}
+
+
+
+```
+
+
+### other
+
+These are other random attempts that I probably will not want to use.
+
+
+```{r crash return changes , echo = FALSE}
+
+# show plots of changes in holdings for different time periods
+
+#rank firms according to their crash return
+
+values <- data[date >= date.trough & !is.na(quart.crash) , c('ticker',  'date','frac.users', 'users_holding', 'conm', 'ret.crash', 'quart.crash')]
+
+
+
+# plot development of users for firms of the four quartiles
+
+values[, normalization := .SD[ date == date.trough , sum(users_holding, na.rm = TRUE) ] , by = quart.crash]
+values[, normalization.f := .SD[ date == date.trough , mean(frac.users, na.rm = TRUE) ] , by = quart.crash]
+
+
+values <-values[, .( users_holding = sum(users_holding) / normalization ,
+                      frac.users = mean(frac.users) / normalization.f ), by= c('date', 'quart.crash')]
+    
+
+
+plot.users.postcrash <- values %>% 
+    ggplot(aes(x=date, y=users_holding, group = factor(quart.crash)))+
+    geom_line(aes(colour=factor(quart.crash)))+
+    labs(color = "return during market crash") +
+    ggtitle("Number of Users since March by quartile of crash returns")+
+    ylab("Number of users") + xlab('date')+
+    theme(panel.background = element_rect(fill = "white") )
+
+
+
+
+```
+
+The following plot shows the cumulative number of users since the beginning of the stock market recovery, grouped by performance during the crash. Firms are ranked into four quartiles based on the cumulative excess return from Feb 21st to March 20th, then number of users since March is plotted. It looks like retail investors focused on companies that collapsed the most during the crash, perhaps in search for a bargain.
+
+```{r print crash returns in recovery plot, echo = FALSE, message= FALSE, warning=FALSE}
+plot.users.postcrash
+```
+
+The following plot shows that the stocks that became the most popular during the crash, are also those that performed the best during recovery.
+
+```{r crash users predict recovery, echo= FALSE }
+
+regressand <- 'frac.users'
+
+variables <- c(regressand,'exc.ret', 'date', 'ticker' )
+
+changes <- data[date %in% c(date.pre, date.trough), ..variables ][order(ticker, date)][, .( change = 100* (.SD[2, get(regressand) ]- .SD[1, get(regressand) ])/ .SD[1,get(regressand)]), by = ticker ]   
+
+changes$quartile <- ntile(changes$change,4)
+
+values <- (merge( data[date>=date.trough , ..variables ], changes, by = 'ticker', nomatch = 0 ))[order(ticker, date)]
+
+values[, cumret := cumprod(1+exc.ret/100) , by = ticker ]
+
+values<- values[!is.na(quartile), .(cumret = mean(cumret, na.rm = TRUE) ) , by = c('quartile' , 'date')][, cumret := cumret / .SD[date ==date.trough, cumret  ], by = quartile ]
+
+plot <- values %>% 
+        ggplot(aes(x=date, y=cumret, group = factor(quartile)))+
+        geom_line(aes(colour=factor(quartile)))+
+        labs(color = "quartile of % change in users during crash") +
+        ggtitle("Cumulative Return in recovery by quartile of changes in Users during crash")+
+        ylab("Cumulative Excess Return") + xlab('date')+
+        theme(panel.background = element_rect(fill = "white") )
+plot  
+
+```
+
+
+
+
+
+
+
+

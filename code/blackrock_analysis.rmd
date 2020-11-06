@@ -1,14 +1,14 @@
 ---
-title: "Graphs for Blackrock"
-output: github_document
+title: "Sin and Fossil holdings: Blackrock case study"
+output: html_notebook
 ---
 
-This code takes the outputs from code run on the WRDS cloud, typically data.tables, and creates the necessary graphs and visualizations.
 
-```{r setup, include =FALSE}
+
+```{r setup, include =FALSE, echo = FALSE}
 rm(list=ls())
 knitr::opts_knit$set(results='hide')
-knitr::opts_chunk$set(fig.width=8, fig.height=6) 
+knitr::opts_chunk$set(fig.width=8 , fig.height=6, echo = FALSE) 
 
 
 library(ggplot2)
@@ -16,10 +16,8 @@ library(data.table)
 library(zoo)
 ```
 
-## Load and polish data
 
 ```{r load data}
-#br <- readRDS(file = 'output/sin_frac_by_type_sep23.rds')
 
 br <- fread(file = 'output/blackrock.csv', header = TRUE, stringsAsFactors = FALSE)[order(yq)]
 
@@ -31,7 +29,7 @@ br$date <- as.Date( as.yearqtr(br$yq), frac = 1 )
 plot <- ggplot(data= br, aes(x=date, y=tot.value))+
     geom_line()+
     ggtitle("Value of holdings in sample over time")+
-    ylab("Wigthed fraction to Sin") + xlab('Quarter')
+    ylab("Dollar value of portfolio") + xlab('Quarter')
 plot
 ```
 
@@ -39,22 +37,22 @@ plot
 plot <- ggplot(data= br, aes(x=date, y=num.obs))+
     geom_line()+
     ggtitle("Number of holdings observations in sample over time")+
-    ylab("Wigthed fraction to Sin") + xlab('Quarter')
+    ylab("num. obs") + xlab('Quarter')
 plot
 ```
 ## Who holds sin stocks
 ```{r plot sin}
 plot <- ggplot(data= br, aes(x=date,y=sin.frac.unwei))+
     geom_line()+
-    ggtitle("Fraction of portfolio in Sin stocks (unweighted)")+
-    ylab("Wigthed fraction to Sin") + xlab('Quarter')
+    ggtitle("Fraction of portfolio in Sin stocks (number)")+
+    ylab("Fraction to Sin") + xlab('Quarter')
 plot
 ```
 ```{r plot sin unweighted}
 plot <- ggplot(data= br, aes(x=date,y=sin.frac))+
     geom_line()+
     labs(color = "Investor Type") +
-    ggtitle("Fraction of portfolio in Sin stocks (weighted)")+
+    ggtitle("Fraction of portfolio in Sin stocks (value)")+
     ylab("Fraction to Sin") + xlab("Quarter")
 plot
 ```
@@ -63,15 +61,15 @@ plot
 plot <- ggplot(data= br, aes(x=date,y=fossil.frac.unwei))+
     geom_line()+
     labs(color = "Investor Type") +
-    ggtitle("Fraction of portfolio in Fossil stocks by investor type (unweighted)")+
-    ylab("Wigthed fraction to Fossil")+ xlab('Quarter')
+    ggtitle("Fraction of portfolio in Fossil stocks (number)")+
+    ylab("Fraction to Fossil")+ xlab('Quarter')
 plot
 ```
 ```{r plot fossil unweighted}
 plot <- ggplot(data= br, aes(x=date,y=fossil.frac))+
     geom_line()+
     labs(color = "Investor Type") +
-    ggtitle("Fraction of portfolio in Fossil stocks (weighted)")+
+    ggtitle("Fraction of portfolio in Fossil stocks (value)")+
     ylab("Fraction to Fossil")+ xlab('Quarter')
 plot
 ```
