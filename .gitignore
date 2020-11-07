@@ -38,15 +38,16 @@ vignettes/*.pdf
 
 # R Environment Variables
 *.Renviron
+.Rproj.user
 
 # translation temp files
 po/*~
 
 
-#data files
+#data files (only the very raw ones excluded)
 *.zip
 *.dta
-*.csv
+#*.csv
 *.gz
 
 #Output files that come from other files
@@ -58,7 +59,7 @@ output/
 
 #some folders excluded
 koijen_yogo_replication/
-.Rproj.user
+
 
 # corrupt file that does not work
 write-ups/slides/slides2.tex
