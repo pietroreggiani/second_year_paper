@@ -47,8 +47,10 @@ po/*~
 #data files (only the very raw ones excluded)
 *.zip
 *.dta
-#*.csv
+*.csv
 *.gz
+data/raw
+data/processed
 
 #Output files that come from other files
 *.pdf
