@@ -1,1 +1,2 @@
 \babel@toc {english}{}
+\contentsline {section}{\numberline {1}Data and Summary Statistics}{11}{section.1}%

@@ -15,6 +15,7 @@
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{subcaption}
+\usepackage{adjustbox}
 %\usepackage{caption}
 %\usepackage{siunitx}
     
@@ -58,7 +59,10 @@
 
 \newpage
 
-\input{../../output/tables/sumtable1}
+
+\input{../../output/tables/sumtable1} 
+
+
 \input{../../output/tables/sumtable2}
 \input{../../output/tables/sumtable3}
 
@@ -124,10 +128,36 @@ Plot the fixed effects here
 \end{figure}
 
 
+
+\section{Data and Summary Statistics}
+
+The analysis focuses on a peculiar sample of retail investors, the users of a retail trading platform called \textit{Robinhood}\footnote{https://robinhood.com/us/en/}. This company was the first to offer a commission-free brokerage account, easily accessible to investors through a smart phone application. 
+
+[EXPAND ON ROBINHOOD INFO, amount age of users etc. !!!!]
+
+
+The main data set used in the analysis comes directly from the platform through an API\footnote{for more details, visit https://robintrack.net/}. Approximately every hour, the company provides the number of users currently holding each asset. The hourly figure is then averaged at the daily level. The sample stretches from [INSERT DATES !!!!!!].
+
+It is important to underline immediately the main limitation of these data: the value of investors' positions in each asset is unknown. Intuitively, each investor can own multiple shares of the same stock. In addition, it is possible to invest in fractions of a single share. This means that the numerosity of users is not sufficient to compute portfolio weights. Notice that also the total number of users on the platform is unknown, which prevents us from knowing the fraction of users holding each asset. Therefore, the main variable of interest will be the number of users holding a stock over time. This can be interpreted as a measure of the popularity of that asset among investors.
+
+
+The available data include stocks and ETFs accessible on the platform. Information on derivative positions is not available. For the purpose of this paper, the universe of assets under consideration is limited to stocks and ADRs listed in the three main U.S. exchanges [WRITE EXCHANGES HERE CODES !!!!].
+
+The Robinhood data are matched with company and security level information from Compustat Capital IQ North America.
+
+
+
+
+
+
+
+
 %\newpage
 %\nocite{*}
 %\bibliography{bibliography} 
 %\bibliographystyle{plainnat}
+ 
+ 
  
  
 \end{document}

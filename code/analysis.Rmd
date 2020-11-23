@@ -39,12 +39,14 @@ Cross-section of changes in holdings:
     
 ## Setup
 
+The second chunk is the one where you set the appropriate folder where to export tables and plots.
+
 ```{r setup, include=FALSE , eval = TRUE}
 
 #knitr::opts_knit$set(results='hide')
 knitr::opts_chunk$set(fig.width=9, fig.height=6, warning = FALSE) 
-knitr::opts_knit$set(root.dir = 'D:/Piter USB/PhD local folder/second_year_paper')
-setwd('D:/Piter USB/PhD local folder/second_year_paper')
+knitr::opts_knit$set(root.dir = 'C:/Users/pietr/GDrive Stern/research/second_year_paper')
+setwd('C:/Users/pietr/GDrive Stern/research/second_year_paper')
 
 gc()
 remove(list= ls())
@@ -170,14 +172,14 @@ paper = FALSE
 returns.crash <- data[between(date, date.pre, date.trough)] %>% 
     select(ticker, exc.ret) %>% 
     group_by(ticker) %>% 
-    summarize( ret.crash =  ( prod( 1 + exc.ret/100 )^(1/as.integer(date.trough-date.pre)) -1 ) *100   )
+    dplyr::summarise( ret.crash =  ( prod( 1 + exc.ret/100 )^(1/as.integer(date.trough-date.pre)) -1 ) *100   )
 
 returns.crash$quart.crash <- ntile(returns.crash$ret.crash , 4)
 
 returns.recovery <- data[between(date, date.trough, date.post)] %>% 
     select(ticker, exc.ret) %>% 
     group_by(ticker) %>% 
-    summarize( ret.recovery =  ( prod( 1 + exc.ret/100 )^(1/as.integer(date.post-date.trough)) -1 ) *100   )
+    dplyr::summarize( ret.recovery =  ( prod( 1 + exc.ret/100 )^(1/as.integer(date.post-date.trough)) -1 ) *100   )
 
 returns.recovery$quart.recovery <- ntile(returns.recovery$ret.recovery , 4)
 
@@ -246,89 +248,59 @@ All Compustat financial variables are as of the end of 2019. TRESGS is the ESG s
 For some reason this summary table plotted with vtable is giving problems. **TODO FINISH THE FORMATTING**
 
 
+
 ```{r summary stats levels, echo=FALSE, warning=FALSE}
-
-# choose method
-vtable = TRUE
-summarytools = FALSE
-
-# choose variables to include
-
-sumvars <- c('beta' ,  'bv', 'BM', 'log.mkt.cap', 'assets','cash.st', 'cash.assets' , 'com.shares.out', 'debt.current', 'debt.lt', 'leverage', 'profitability' , 'ENSCORE', 'TRESGS', 'TRESGCS', 'users_holding', 'frac.users', 'ret.mom', 'log.tv', 'ret.crash', 'ret.recovery')
-
-#preallocate memory
-tables <- list()
-length(tables) <- length(dates)
-
-if (summarytools){
-    stats = c('n.valid','min','q1', 'med', 'q3', 'max', 'sd') #for summarytools
-} else{
-    stats = c('NUnique','Min','P25', 'Median', 'P75', 'Max', 'SD')  #for modelsummary
-}
-
-
-for (i in 1:length(dates)){
-    
-    date.now <- dates[i]
-    
-    if(vtable){
-        
-        tables[[i]] <- st(data[date == date.now, ..sumvars], out = "kable" )
-        
-        st(data[date == date.now, ..sumvars], out = "latex",
-           file = paste( tables.folder, "/sumtable", as.character(i) , ".tex", sep = "") )
-            
-        #summarytools::descr(data[date == date.now, ..sumvars], stats = stats , transpose = TRUE,
-        #style = "rmarkdown", round.digits = 1) %>%  tb()
-        
-    } else {
-        
-        f <- as.formula( paste( paste(sumvars, collapse = "+") , "~", paste(stats, collapse = "+")   )     )
-        
-        datasummary( f  , data = data[date == date.now, ..sumvars] ,
-                     output = paste( tables.folder, "/sumtable", as.character(i) , ".tex", sep = "") ) 
-    }
-    
-    
-    
-}
-
-if (vtable){
-    print( tables[[1]])
-    cat('\n\n')
-    print( tables[[2]])
-    cat('\n\n')
-   print( tables[[3]])
-}
-
-
-   
-
-```
-
-new attempt using modelsummary package. The problem is that for some reason the command does not calculate some statistics.
-
-```{r summary stats levels 2, echo=FALSE, warning=FALSE}
 
 # choose variables to include
 
 sumvars <- c('beta' ,  'bv', 'BM', 'log.mkt.cap', 'assets','cash.st', 'cash.assets' , 'com.shares.out', 'debt.current', 'debt.lt', 'leverage', 'profitability' , 'ENSCORE', 'TRESGS', 'TRESGCS', 'users_holding', 'frac.users', 'ret.mom', 'log.tv')
 
+
+sumvars.labeled <- c( 'Heading("Beta")* beta' ,
+              'Heading("Book Value")* bv',
+              'Heading("Book-to-Market")* BM',
+              'Heading("log(Market Cap)")* log.mkt.cap',
+              'Heading("Total Assets")* assets',
+              'Heading("Cash and S.t. assets")* cash.st',
+              'Heading("Cash/Assets")* cash.assets' ,
+              'Heading("Common Shares Outstanding")* com.shares.out',
+              'Heading("Current Debt")* debt.current',
+              'Heading("L.t. Debt")* debt.lt',
+              'Heading("Leverage")* leverage',
+              'Heading("Profitability")* profitability' , 
+              'Heading("Environment Score")* ENSCORE', 
+              'Heading("ESG score")* TRESGS',
+              'Heading("Num. Users holding")* users_holding',
+              'Heading("Momentum")* ret.mom',
+              'Heading("log(Trading Vol.)")* log.tv')
+
+
 #preallocate memory
 tables <- list()
 length(tables) <- length(dates)
 
-stats = c('NUnique','Min','P25', 'Median', 'P75', 'Max', 'SD')  #for modelsummary
+# define median and standard devitaion because for some reason the standard ones dont work
+
+mymedian <- function(x) median(x, na.rm = TRUE)
+mysd <- function(x) sd(x, na.rm = TRUE)
+
+stats = c( 'Heading("Num. Obs.")*NUnique',
+           'Heading("Min")*Min',
+           'Heading("Q25")*P25',
+           'Heading("Median")*mymedian',
+           'Heading("Q75")*P75',
+           'Heading("Max")*Max',
+           'Heading("S.D.")*mysd')  
 
 
 for (i in 1:length(dates)){
     
     date.now <- dates[i]
     
-    f <- as.formula( paste( paste(sumvars, collapse = "+") , "~", paste(stats, collapse = "+")   )     )
+    f <- as.formula( paste( paste(sumvars.labeled, collapse = "+") , "~", paste(stats, collapse = "+")   )     )
     
-    datasummary( f  , data = data[date == date.now, ..sumvars] ,
-                     output = paste( tables.folder, "/sumtable", as.character(i) , ".tex", sep = "") ) 
+    datasummary( f  , data = data[date == date.now, ..sumvars] , 
+                     output = paste( tables.folder, "/sumtable", as.character(i) , ".tex", sep = ""), fmt = "%.2f" ) 
     
 }
 
