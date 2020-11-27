@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.11) (preloaded format=pdflatex 2020.11.6)  24 NOV 2020 19:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.11) (preloaded format=pdflatex 2020.11.6)  27 NOV 2020 18:37
 entering extended mode
 **./syp_pietro.tex
 (syp_pietro.tex
@@ -475,11 +475,7 @@ File: l3backend-pdftex.def 2020-09-24 L3 backend support: PDF output (pdfTeX)
 \l__kernel_color_stack_int=\count299
 \l__pdf_internal_box=\box57
 )
-(syp_pietro.aux
-
-LaTeX Warning: Label `crashreg' multiply defined.
-
-)
+(syp_pietro.aux)
 \openout1 = `syp_pietro.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 43.
@@ -593,138 +589,80 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \tf@toc=\write4
 \openout4 = `syp_pietro.toc'.
 
- [2]
-(../../output/tables/pre_fe_tab_enscore.tex)
-(../../output/tables/crash_fe_tab_enscore.tex
-Overfull \hbox (34.45854pt too wide) in paragraph at lines 4--38
- [][] 
- []
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-) [3]
-<../../output/charts/fixed_effects.png, id=46, 803.0pt x 602.25pt>
-File: ../../output/charts/fixed_effects.png Graphic file (type png)
-<use ../../output/charts/fixed_effects.png>
-Package pdftex.def Info: ../../output/charts/fixed_effects.png  used on input l
-ine 81.
-(pdftex.def)             Requested size: 401.49902pt x 301.12425pt.
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[4] [5 <../../output/charts/fixed_effects.png>]
-(../../output/tables/recovery_fe_tab_enscore.tex
-Overfull \hbox (28.44493pt too wide) in paragraph at lines 4--38
- [][] 
- []
-
-)
-<../../output/charts/MRNA.png, id=58, 462.528pt x 346.896pt>
-File: ../../output/charts/MRNA.png Graphic file (type png)
-<use ../../output/charts/MRNA.png>
-Package pdftex.def Info: ../../output/charts/MRNA.png  used on input line 107.
-(pdftex.def)             Requested size: 323.76738pt x 242.82553pt.
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-<../../output/charts/AAPL.png, id=59, 462.528pt x 346.896pt>
-File: ../../output/charts/AAPL.png Graphic file (type png)
-<use ../../output/charts/AAPL.png>
-Package pdftex.def Info: ../../output/charts/AAPL.png  used on input line 113.
-(pdftex.def)             Requested size: 323.76738pt x 242.82553pt.
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-<../../output/charts/HTZ.png, id=60, 462.528pt x 346.896pt>
-File: ../../output/charts/HTZ.png Graphic file (type png)
-<use ../../output/charts/HTZ.png>
-Package pdftex.def Info: ../../output/charts/HTZ.png  used on input line 119.
-(pdftex.def)             Requested size: 323.76738pt x 242.82553pt.
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-<../../output/charts/AAL.png, id=61, 462.528pt x 346.896pt>
-File: ../../output/charts/AAL.png Graphic file (type png)
-<use ../../output/charts/AAL.png>
-Package pdftex.def Info: ../../output/charts/AAL.png  used on input line 125.
-(pdftex.def)             Requested size: 323.76738pt x 242.82553pt.
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[6] [7 <../../output/charts/MRNA.png> <../../output/charts/AAPL.png>] [8 <../..
-/output/charts/HTZ.png> <../../output/charts/AAL.png>] [9]
+ [2] [3]
 (../../output/tables/sumtable1.tex
 Overfull \hbox (75.53905pt too wide) in paragraph at lines 3--26
  [][] 
  []
 
-) [10]
-<../../output/charts/value.png, id=104, 650.43pt x 433.62pt>
+)
+<../../output/charts/value.png, id=69, 650.43pt x 433.62pt>
 File: ../../output/charts/value.png Graphic file (type png)
 <use ../../output/charts/value.png>
-Package pdftex.def Info: ../../output/charts/value.png  used on input line 158.
+Package pdftex.def Info: ../../output/charts/value.png  used on input line 108.
 
-(pdftex.def)             Requested size: 390.261pt x 260.17401pt.
- [11 <../../output/charts/value.png>]
-(../../output/tables/pre_fe_tab_enscore_slides.tex) [12] [13]
-<../../output/charts/MSFT.png, id=133, 462.528pt x 346.896pt>
+(pdftex.def)             Requested size: 325.2142pt x 216.80946pt.
+ [4] [5] [6 <../../output/charts/value.png>]
+(../../output/tables/pre_fe_tab_enscore_slides.tex) [7] [8]
+<../../output/charts/MSFT.png, id=116, 462.528pt x 346.896pt>
 File: ../../output/charts/MSFT.png Graphic file (type png)
 <use ../../output/charts/MSFT.png>
-Package pdftex.def Info: ../../output/charts/MSFT.png  used on input line 199.
+Package pdftex.def Info: ../../output/charts/MSFT.png  used on input line 149.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/GOOGL.png, id=134, 462.528pt x 346.896pt>
+<../../output/charts/GOOGL.png, id=117, 462.528pt x 346.896pt>
 File: ../../output/charts/GOOGL.png Graphic file (type png)
 <use ../../output/charts/GOOGL.png>
-Package pdftex.def Info: ../../output/charts/GOOGL.png  used on input line 203.
+Package pdftex.def Info: ../../output/charts/GOOGL.png  used on input line 153.
 
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/AMZN.png, id=135, 462.528pt x 346.896pt>
+<../../output/charts/AMZN.png, id=118, 462.528pt x 346.896pt>
 File: ../../output/charts/AMZN.png Graphic file (type png)
 <use ../../output/charts/AMZN.png>
-Package pdftex.def Info: ../../output/charts/AMZN.png  used on input line 213.
+Package pdftex.def Info: ../../output/charts/AMZN.png  used on input line 163.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/TSLA.png, id=136, 462.528pt x 346.896pt>
+<../../output/charts/TSLA.png, id=119, 462.528pt x 346.896pt>
 File: ../../output/charts/TSLA.png Graphic file (type png)
 <use ../../output/charts/TSLA.png>
-Package pdftex.def Info: ../../output/charts/TSLA.png  used on input line 217.
+Package pdftex.def Info: ../../output/charts/TSLA.png  used on input line 167.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
+<../../output/charts/AAL.png, id=120, 462.528pt x 346.896pt>
 File: ../../output/charts/AAL.png Graphic file (type png)
 <use ../../output/charts/AAL.png>
-Package pdftex.def Info: ../../output/charts/AAL.png  used on input line 227.
+Package pdftex.def Info: ../../output/charts/AAL.png  used on input line 177.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
+<../../output/charts/HTZ.png, id=121, 462.528pt x 346.896pt>
 File: ../../output/charts/HTZ.png Graphic file (type png)
 <use ../../output/charts/HTZ.png>
-Package pdftex.def Info: ../../output/charts/HTZ.png  used on input line 231.
+Package pdftex.def Info: ../../output/charts/HTZ.png  used on input line 181.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/sectors_crash.png, id=138, 650.43pt x 433.62pt>
+ [9 <../../output/charts/MSFT.png> <../../output/charts/GOOGL.png> <../../outpu
+t/charts/AMZN.png> <../../output/charts/TSLA.png>]
+<../../output/charts/sectors_crash.png, id=132, 650.43pt x 433.62pt>
 File: ../../output/charts/sectors_crash.png Graphic file (type png)
 <use ../../output/charts/sectors_crash.png>
 Package pdftex.def Info: ../../output/charts/sectors_crash.png  used on input l
-ine 243.
+ine 193.
 (pdftex.def)             Requested size: 375.80544pt x 250.54037pt.
-<../../output/charts/sectors_recovery.png, id=139, 650.43pt x 433.62pt>
+<../../output/charts/sectors_recovery.png, id=133, 650.43pt x 433.62pt>
 File: ../../output/charts/sectors_recovery.png Graphic file (type png)
 <use ../../output/charts/sectors_recovery.png>
 Package pdftex.def Info: ../../output/charts/sectors_recovery.png  used on inpu
-t line 247.
+t line 197.
 (pdftex.def)             Requested size: 375.80544pt x 250.54037pt.
- [14 <../../output/charts/MSFT.png> <../../output/charts/GOOGL.png>] [15 <../..
-/output/charts/AMZN.png> <../../output/charts/TSLA.png>] [16 <../../output/char
-ts/sectors_crash.png> <../../output/charts/sectors_recovery.png>]
+
 (../../output/tables/crash_fe_tab_enscore_slides.tex
 Overfull \hbox (34.45854pt too wide) in paragraph at lines 1--35
 [][] 
  []
 
-) (../../output/tables/recovery_fe_tab_enscore_slides.tex
+) [10 <../../output/charts/AAL.png> <../../output/charts/HTZ.png>] [11 <../../o
+utput/charts/sectors_crash.png> <../../output/charts/sectors_recovery.png>]
+[12] (../../output/tables/recovery_fe_tab_enscore_slides.tex
 Overfull \hbox (28.44493pt too wide) in paragraph at lines 1--35
 [][] 
  []
 
-) [17] [18] [19] (../../output/tables/sumtable2.tex
+) [13] [14] (../../output/tables/sumtable2.tex
 Overfull \hbox (75.53905pt too wide) in paragraph at lines 3--26
  [][] 
  []
@@ -734,38 +672,33 @@ Overfull \hbox (75.8696pt too wide) in paragraph at lines 3--26
  [][] 
  []
 
-) [20] [21] (syp_pietro.aux)
+) [15] [16] (syp_pietro.aux)
 Package rerunfilecheck Info: File `syp_pietro.out' has not changed.
-(rerunfilecheck)             Checksum: 04BAC541DC55365E3FAD10AC118EBEAE;317.
-
-
-LaTeX Warning: There were multiply-defined labels.
-
+(rerunfilecheck)             Checksum: 92E0DC4510EE7FBBBE32EABE3DFC43DA;462.
  ) 
 Here is how much of TeX's memory you used:
- 12243 strings out of 479799
- 187610 string characters out of 2879599
- 532307 words of memory out of 3000000
- 28922 multiletter control sequences out of 15000+200000
- 545478 words of font info for 69 fonts, out of 3000000 for 9000
+ 12211 strings out of 479799
+ 186405 string characters out of 2879599
+ 526400 words of memory out of 3000000
+ 28909 multiletter control sequences out of 15000+200000
+ 545451 words of font info for 69 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 66i,14n,74p,1241b,497s stack positions out of 5000i,500n,10000p,200000b,50000s
- <C:\Users\pietr\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
-1000.pk><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/
-Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program File
-s/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX/font
-s/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX/fonts/type1/publi
-c/amsfonts/cm/cmr12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm
-/cmr17.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:
-/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files
-/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX/font
-s/type1/public/amsfonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX/fonts/type1/publi
-c/amsfonts/cm/cmti12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/s
-ymbols/msam10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/
-msbm10.pfb>
-Output written on syp_pietro.pdf (21 pages, 477587 bytes).
+ 66i,14n,74p,1831b,497s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Progra
+m Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Files/MiKT
+eX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files/MiKTeX/fonts/typ
+e1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/ams
+fonts/cm/cmr10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr1
+2.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Pro
+gram Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Program Files/MiK
+TeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files/MiKTeX/fonts/type
+1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/ams
+fonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmti
+12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
+<C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on syp_pietro.pdf (16 pages, 442775 bytes).
 PDF statistics:
- 246 PDF objects out of 1000 (max. 8388607)
- 49 named destinations out of 1000 (max. 500000)
- 93 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 234 PDF objects out of 1000 (max. 8388607)
+ 42 named destinations out of 1000 (max. 500000)
+ 102 words of extra memory for PDF output out of 10000 (max. 10000000)
 

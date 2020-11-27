@@ -46,12 +46,16 @@
 %                         Start here
 % --------------------------------------------------------------
  
-\title{ Environmental, Social and Governance Factors in Finance \\ \vspace{3mm}
-\small A Literature Review \\ for PhD class by Professor Viral Acharya}
+\title{ Retail Traders Through Booms and Busts: \\ \vspace{1mm}
+ Evidence from Robinhood \\ \vspace{7mm} \small NYU Stern Finance Ph.D. \\ Second Year Paper}
 \author{Pietro Reggiani}
 \date{\today}
  
 \maketitle
+
+\begin{abstract}
+Test of the abstract
+\end{abstract}
 
 \newpage
 
@@ -60,71 +64,10 @@
 \newpage
 
 
+\section{Introduction}
 
 
-
-
-
-%\input{../../output/tables/pre_nonfe_tab}
-
-Pre is until Feb 21st Crash is between then and March 20th, recovery is march 20th to August 7th.
-
-\input{../../output/tables/pre_fe_tab_enscore}
-\input{../../output/tables/crash_fe_tab_enscore}
-\newpage
-
-Plot the fixed effects here
-
-\begin{figure}[h!]
-\caption{Fixed Effects From Crash Change Regression (Feb 21st to March 20th)}
-\centering
-\includegraphics[scale=0.5]{../../output/charts/fixed_effects.png}
-\end{figure}
-
-203020 is Airlines, 253010 is Hotels Restaurants and Leisure, 101010 and 101020 are oil and gas, 301010 is food and staples retailing.
-
-\newpage
-
-\input{../../output/tables/recovery_fe_tab_enscore}
-
-
-
-%\input{../../output/tables/pre_fe_tab_enscore_weight_compact}
-%\input{../../output/tables/crash_fe_tab_enscore_weight_compact}
-%\input{../../output/tables/recovery_fe_tab_enscore_weight_compact}
-
-
-%\input{../../output/tables/pre_nonfe_tab_enscore}
-
-
-%\input{../../output/tables/post_fe_tab}
-%\input{../../output/tables/pre_fe_tab_day_before}
-
-
-\begin{figure}[h!]
-\caption{•}
-\centering
-\includegraphics[scale=0.7]{../../output/charts/MRNA.png}
-\end{figure}
-
-\begin{figure}[h!]
-\caption{•}
-\centering
-\includegraphics[scale=0.7]{../../output/charts/AAPL.png}
-\end{figure}
-
-\begin{figure}[h!]
-\caption{•}
-\centering
-\includegraphics[scale=0.7]{../../output/charts/HTZ.png}
-\end{figure}
-
-\begin{figure}[h!]
-\caption{•}
-\centering
-\includegraphics[scale=0.7]{../../output/charts/AAL.png}
-\end{figure}
-
+\section{Related Literature}
 
 \section{Data and Summary Statistics}
 
@@ -133,35 +76,42 @@ The analysis focuses on a peculiar sample of retail investors, the users of a re
 [EXPAND ON ROBINHOOD INFO, amount age of users etc. !!!!]
 
 
-The main data set comes directly from the platform through an API\footnote{for more details, visit the data source at https://robintrack.net/.}. Approximately every hour, the company provides the number of users currently holding each asset. The hourly figure is then averaged at the daily level. The sample period stretches from May 2018 until August 2020.
+The main data set is provided directly from the platform through an API\footnote{for more details, visit the data source at https://robintrack.net/.}. Approximately every hour, the company provides the number of users currently holding each asset. The hourly figure is then averaged at the daily level. The sample period stretches from May 2018 until August 2020.
 
-It is important to underline immediately the main limitation of the data: the value of investors' positions in each asset is unknown. Intuitively, each investor can own multiple shares of the same stock. In addition, it is possible to invest in fractions of a single share. This means that the numerosity of users is not sufficient to compute portfolio weights. Notice that also the total number of users on the platform is unknown, which prevents us from knowing the fraction of users holding each asset. Therefore, the main variable of interest will be the number of users holding a stock over time. This can be interpreted as a measure of the popularity of that asset among investors.
+It is important to underline the main limitation of the data: the value of investors' positions in each asset is unknown. Intuitively, each investor can own multiple shares of the same stock. In addition, it is possible to invest in fractions of a single share. This means that the numerosity of users is not sufficient to compute portfolio weights. Notice that also the total number of users on the platform is unknown, which prevents us from knowing the fraction of users holding each asset. Therefore, the main variable of interest will be the number of users holding a stock over time. This can be interpreted as a measure of the popularity of that asset among investors.
 
 The available data include stocks and ETFs that users can invest in on the platform. Information on derivative positions is not available. For the purpose of this paper, the universe of assets is limited to stocks and ADRs listed in the three main U.S. exchanges: NYSE, AMEX, and NASDAQ (Compustat exchange codes 11,12,14). Financial firms ($GICS$ code 40) are excluded from the sample.
 
-The Robinhood data are matched with company and security level information from Compustat Capital IQ North America. Company financial statement data are at the yearly frequency, so daily observations for year $t$ are associated to financials from end of year $t-1$. Daily stock prices and returns come from the Compustat Securities Daily database. All the Compustat data are accessed through $WRDS$\footnote{https://wrds-www.wharton.upenn.edu/.}.
+The Robinhood data are matched to company and security level information from Compustat Capital IQ North America. Company financial statement data are at the yearly frequency, so daily observations for year $t$ are associated to financials from end of year $t-1$. Daily stock prices and returns come from the Compustat Securities Daily database. All the Compustat data are accessed through $WRDS$\footnote{https://wrds-www.wharton.upenn.edu/.}.
 
-Finally, we gather ESG\footnote{I.e., Environmental, Social and Governance.} scores from the \textit{Thomson Reuters ASSET4} database, accessed through \textit{Datastream}. These scores are at the yearly frequency and available for a sub-sample of firms until end of year 2019. Similarly to accounting information, end of year scores are matched to daily observations of the subsequent year. The main score included in the analysis is the $E-score$ that only takes into account firms' environmental outcomes. Results using the comprehensive ESG score are similar and available upon request.  
+Finally, we gather ESG\footnote{I.e., Environmental, Social and Governance.} scores from the \textit{Thomson Reuters ASSET4} database, accessed through \textit{Datastream}. These scores are at the yearly frequency and available for a sub-sample of firms until end of year 2019. Similarly to accounting information, end of year scores are matched to daily observations of the subsequent year. When 2019 scores are missing, daily observations for 2020 are matched to the end of 2018 score. The main score included in the analysis is the \textit{E-score} that only takes into account firms' environmental outcomes. Results using the comprehensive ESG score are similar and available upon request.  
 
-Merging all these data sets we end up with a panel of $1,821,974$ daily observations for a little less than $4,000$ firms.
+Merging all these data sets we end up with a panel of $1,821,974$ daily observations for slightly less than $4,000$ firms.
 
 Great part of the analysis will focus on investor reaction to the market turbulence stirred by the Covid-19 outbreak. For this reason, we divide the sample in three main periods. The "Pre-pandemic" period ranges from May 2018 to February 21st 2020, the day of the last S\&P-500 peak preceding the market collapse. The "Crash" period follows, from February 21st until March 20th, when market valuations declined. Finally, the "Recovery" period begins on March 21st, just before the Federal Reserve's intervention, and reaches the end of the sample on August 7th 2020.
 
-Table [REF !!!] below shows summary statistics for the main variables as of the beginning of the crash period, on February 21st 2020. Similar tables for March 20th and August 7th can be found in the Appendix.
+Table \ref{sumstats} shows summary statistics for the main variables as of the beginning of the crash period, on February 21st 2020. Similar tables for March 20th and August 7th can be found in the Appendix. [EXPAND ON TABLE COMMENT HERE !!!!!!!!]
 
+\begin{table}
+\centering
+\caption{test} \label{sumstats}
 \input{../../output/tables/sumtable1} 
+\end{table}
 
-To illustrate the growth in popularity of the Robinhood platform, we plot in Figure [REFERENCE !!!!] an estimate of the total value of the stock portfolio in our sample over time. The estimate is computed assuming that each user holding a stock holds exactly one share. That is, we plot the number of users times the share price each day. This is a sizable underestimation, but probably provides an accurate representation of the changes in portfolio value over time. This chart also helps us visualize the sub-periods we highlighted before: "pre-pandemic" in white, "crash" in red and recovery in green. The main empirical analysis will be devoted to describing the cross section of stock popularity across these different periods.
+
+
+To illustrate the growth in popularity of the Robinhood platform, we plot in Figure \ref{linevalue} an estimate of the total value of the stock portfolio in our sample over time. The estimate is computed assuming that each user holding a stock holds exactly one share. That is, we plot the number of users times the share price each day. This is a sizable underestimation, but is useful to describe the changes in the total portfolio value over time. In addition, this chart helps us visualize the sub-periods we highlighted before: "pre-pandemic" in white, "crash" in red and "recovery" in green. The main empirical analysis will aim at describing the cross section of stock popularity across these different periods.
 
 \begin{figure}[h!]
-\centering
-\includegraphics[scale=0.6]{../../output/charts/value.png}
+\caption{Test}
+\centering \label{linevalue}
+\includegraphics[scale=0.5]{../../output/charts/value.png}
 \end{figure}
 
 
 \section{Main Empirical Analysis}
 
-We are after the determinants of stock popularity among retail investors, and how these changed during the Covid-19 crisis. The methodology used in the analysis is the one of cross-sectional regressions. First, in subsection \ref{pre}, we describe the cross-section of stock popularity on the platform using data from the pre-pandemic period. Subsequently, in subsection \ref{covid} we focus on changes in the popularity of stocks during the crash and recovery periods.
+We are after the determinants of stock popularity among retail investors, and how these changed during the Covid-19 crisis. The analysis will be carried out by means of cross-sectional regressions. First, in subsection \ref{pre}, we describe the cross-section of stock popularity during the pre-pandemic period. Subsequently, in subsection \ref{covid} we focus on changes in stock popularity during the crash and recovery periods.
 
 \subsection{Cross-section of popularity pre-pandemic} \label{pre}
 
@@ -171,7 +121,7 @@ log(\# \hspace{1mm} Users_{i,j,t}) = \alpha_t + \sigma_j + \beta \mathbb{X}_{i,t
 $$
 where $i$, $j$ and $t$ indicate firm, sector and calendar day, respectively. The sample period ranges from May 5th 2018 until February 21st 2020.
 
-The results are not surprising. Most coefficients indicate that Robinhood investors are more likely to be holding large stocks, with high beta and book-to-market ratio. Greener assets are also significantly more popular. Interestingly, profitability is negatively correlated with stock popularity. Past stock returns (momentum in the table) do not seem to be a significant predictor of popularity.
+The results are not surprising. Most coefficients indicate that Robinhood investors are more likely to hold larger stocks, with high beta and book-to-market ratio. Greener assets are also significantly more popular. Interestingly, profitability is negatively correlated with stock popularity. Past stock returns (momentum variable) do not seem to be a significant predictor of popularity.
 
 \begin{table} 
 \caption{Cross-Section of Stock Popularity Pre-Pandemic}
@@ -183,11 +133,11 @@ The results are not surprising. Most coefficients indicate that Robinhood invest
 
 \subsection{Cross-section of popularity changes during the Covid crisis} \label{covid}
 
-So far we determined which stock characteristics explain the distribution of users across stocks during "normal times". It is reasonable to believe that these characteristics may change once turbulent times arrive. The recent Covid-19 crisis represents an ideal scenario to test this conjecture. This section presents the results of a cross-sectional analysis similar to the one seen in section \ref{pre}, with two main differences. The first difference is that here the dependent variable will be \emph{changes} in the number of users holding each stock, instead of levels. This is to emphasize the fact that we analyze investor reaction to a particular shock. The second obvious difference is the sample period considered. We will now home in on the two Covid sub-samples previously described: the "crash" period (Feb 21st-Mar 20th) and the "recovery" period (Mar 20th-Aug 7th).
+So far we determined which stock characteristics explain the distribution of users across stocks during "normal times". It is reasonable to believe that these characteristics may change once turbulent times arrive. The recent Covid-19 crisis represents an ideal scenario to test this conjecture. This section presents the results of a cross-sectional analysis similar to the one of section \ref{pre}, with two main differences. The first one is that now the dependent variable is the \emph{change} in the number of users holding each stock, instead of the level. This is to emphasize our focus on the reaction of investors to the shock: how do they reallocate capital across assets? The second obvious difference is the sample period considered. We will now home in on the two Covid sub-samples previously described: the "crash" period (Feb 21st-Mar 20th) and the "recovery" period (Mar 20th-Aug 7th).
 
-The Covid-19 outbreak has clearly been an asymmetric shock, hitting some industries and firms considerably harder than others. For some companies, the recent months have in fact been an unprecedented growth opportunity and spur for innovation. The question is to which stocks retail investors resorted during the market collapse and subsequent rebound.
+The Covid-19 outbreak has clearly been an asymmetric shock, hitting some industries and firms considerably harder than others. In fact, for some companies, the recent months have been an unprecedented growth opportunity and spur for innovation. The question is to which stocks retail investors resorted during the market collapse and subsequent rebound.
 
-Figures \ref{chart-established}, \ref{chart-winners} and \ref{chart-dead} display the users and share price progression since February for well-known firms that we chose as examples. Figure \ref{chart-established} shows two large established firms such as Microsoft and Google, which weathered the crisis well, and at the same time saw a sustained increase in the number of Robinhood users with long positions on their stock. Other firms, such as Amazon and Tesla, depicted in Figure \ref{chart-winners} were clear pandemic winners, and saw their stock price boom alongside the interest on the part of Robinhood traders. The most interesting pair of charts is however in Figure \ref{chart-dead}. These are the examples of two firms that instead were hit the hardest by the pandemic, such as American Airlines, the airline, and Hertz, the car rental company. While their stock price collapsed, and in the case of Hertz while the executives were filing for bankruptcy, these stocks saw a dramatic increase in the interest on the part of Robinhood investors. This suggests that these investors were searching for inexpensive bargains, and were willing to bet on the resurrection of heavily battered firms.
+Figures \ref{chart-established}, \ref{chart-winners} and \ref{chart-dead} display the users and share price progression since February for well-known firms chosen as examples. Figure \ref{chart-established} shows two large, established firms such as Microsoft and Google. From a business standpoint, both weathered the crisis well. At the same time, the number of Robinhood users with long positions on their stock experienced a constant increase. Other firms, such as Amazon and Tesla, depicted in Figure \ref{chart-winners}, were clear pandemic winners. Their stock price boomed alongside interest on the part of Robinhood traders. The most interesting pair of charts is however in Figure \ref{chart-dead}. These are firms that instead were hit the hardest by the pandemic, such as \textit{American Airlines}, the airline, and \textit{Hertz}, the car rental company. While their stock price collapsed, and in the case of Hertz the company was filing for bankruptcy, their popularity among Robinhood experienced an extraordinary increase. This may suggest that these investors were searching for inexpensive bargains, and were willing to bet on the resurrection of heavily battered, risky firms.
 
 
 
@@ -233,7 +183,7 @@ Figures \ref{chart-established}, \ref{chart-winners} and \ref{chart-dead} displa
 \label{chart-dead}
 \end{figure}
 
-Some interesting patterns emerge also if we look at industries rather than single firms. Figure \ref{chart-sectors} displays the sectors that saw the highest and lowest percentage change in Robinhood users during the crash and recovery periods. In both, the largest green bars belong to sectors that suffered the crisis very intensely, such as airlines and hospitality. Especially during the recovery period, it seems that some of the sectors that were clear "pandemic winners" were among those that lost the most in terms of Robinhood popularity. For instance, this is the case for Wireless telecommunication and Pharmaceuticals. This pattern is consistent with the conjecture that these are investors with a strong appetite for bargains, potentially at the expense of the solidity of firm fundamentals.
+Some interesting patterns emerge also by looking at industries instead of single firms. Figure \ref{chart-sectors} displays the sectors that saw the highest and lowest percentage change in Robinhood users during the crash and recovery periods. In both periods, the largest green bars belong to sectors that suffered the crisis severely, such as airlines and hospitality. Especially during the recovery period, it seems that some of the sectors that were clear "pandemic winners" were also among those that lost the most in terms of Robinhood popularity. For instance, this is the case for Wireless telecommunication and Pharmaceuticals. This pattern is consistent with the conjecture that these are investors with a strong appetite for bargains, potentially at the expense of the solidity of firm fundamentals.
 
 \begin{figure}
 \centering
@@ -249,24 +199,34 @@ Some interesting patterns emerge also if we look at industries rather than singl
 \label{chart-sectors}
 \end{figure}
 
-We now move on to a more formal regression analysis of the determinants of cross-sectional changes in users across stocks during the crisis. First, we focus on changes in popularity during the crash period, from February 21st to March 20th 2020.
+We now move on to a more formal regression analysis of the determinants of cross-sectional changes in users during the crisis. First, we focus on changes in popularity during the crash period, from February 21st to March 20th 2020.
 The specification we run is 
 $$
 log(\# \hspace{1mm} Users_{i,j,t+1})-log(\# \hspace{1mm} Users_{i,j,t}) = \alpha log(\# \hspace{1mm} Users_{i,j,t}) + \sigma_j + \beta \mathbb{X}_{i,t} + \varepsilon_{i,j,t}
 $$
-where date $t$ is February 21st and $t+1$ is March 20th, and $i$, $j$ and $t$ indicate firm, sector and calendar day, respectively.
-[CONTINUE commenta i risultati nella tabella...!!!!!!!!!!!!!!!!!]
+where date $t$ is February 21st and $t+1$ is March 20th, and $i$, $j$ and $t$ indicate firm, sector and calendar day, respectively. $\mathbb{X}_{i,t}$ is a vector of firm characteristics, and  $\sigma_j$ indicates sector fixed effects, where sectors are defined by 6-digit \textit{GICS} codes.  The results of the OLS estimation are reported in Table \ref{crashreg}. Focusing on the most complete specification, we observe that popularity changes are correlated with lower firm quality. Investors allocated capital towards firms with lower cash reserves, higher leverage, high market beta and lower profitability. Interestingly, momentum, defined as the average daily excess return over the month preceding February 21st, has a sizable negative coefficient. These investors display a behavior that is not consistent with a "flight to quality" during the market downturn. There is no evidence of investors resorting strongly to "green" assets either. The coefficient on the environmental score is positive and significant, but quite small in magnitude. This somewhat surprising given that this is a sample of young investors that should be more sensitive to environmental issues.
 
-\begin{table} 
+\begin{table}[H]
 \caption{Cross-Section of Stock Popularity during Crash}
 \input{../../output/tables/crash_fe_tab_enscore_slides} \label{crashreg}
 \end{table}
 
+In what follows, we run a similar test, now focusing on the "recovery" period, which coincides with the market improvement that took place since the intervention of the Federal Reserve in late March. In particular, we study changes in popularity from March 20th 2020 to August 7th 2020.
+The specification we run is identical to the one of Table \ref{crashreg}, i.e.,
+$$
+log(\# \hspace{1mm} Users_{i,j,t+1})-log(\# \hspace{1mm} Users_{i,j,t}) = \alpha log(\# \hspace{1mm} Users_{i,j,t}) + \sigma_j + \beta \mathbb{X}_{i,t} + \varepsilon_{i,j,t}
+$$
+where date $t$ is March 20th and $t+1$ is August 7th, and $i$, $j$ and $t$ indicate firm, sector and calendar day, respectively. $\mathbb{X}_{i,t}$ is a vector of firm characteristics, and  $\sigma_j$ indicates sector fixed effects, where sectors are defined by 6-digit \textit{GICS} codes.  The results of the OLS estimation are reported in Table \ref{recoveryreg}. Let us focus on the rightmost column 5. Comparing the results with those of Table \ref{crashreg}, we notice that the main effects appear similar: high leverage, low cash and profitability predict increasing popularity. In this period however, also size and book-to-market are positively correlated with investments, and market beta is now a negative predictor of users change\footnote{Market beta for every firm is calculated using data from the previous year, 2019 in this case. It may therefore be the case that after the pandemic this measure does no reflect market co-variation properly.}. Moreover, good environmental measures do correlate with investors' interest during this period, perhaps because investors expect the future recovery of the economy to proceed in parallel with a green transition. Arguably, the most striking result is the coefficient on momentum. The momentum variable is the average daily excess return approximately during the crash period: the month leading up to March 20th. The coefficient is strongly significant, as it was in Table \ref{crashreg}, and here considerably larger in magnitude. A one percent higher momentum return leads to an eight percentage point lower change in users over the period considered. This result is consonant with the idea that Robinhood investors were in quest of stocks severely struck by the onset of the pandemic, potentially representing good value for money.
 
-\begin{table} 
+
+\begin{table}[H]
 \caption{Cross-Section of Stock Popularity during Recovery}
-\input{../../output/tables/recovery_fe_tab_enscore_slides} \label{crashreg}
+\input{../../output/tables/recovery_fe_tab_enscore_slides} \label{recoveryreg}
 \end{table}
+
+
+\section{Conclusion}
+
 
 %\newpage
 %\nocite{*}
@@ -279,5 +239,6 @@ where date $t$ is February 21st and $t+1$ is March 20th, and $i$, $j$ and $t$ in
 \input{../../output/tables/sumtable2}
 \input{../../output/tables/sumtable3}
  
+ [need one table with variable definitions !!!!!!!!!!!!!!!!!!!!!!!!]
  
 \end{document}

@@ -4,3 +4,4 @@
 . put summary statistics in appendix, ideally fix number formatting
 . create table with variable definitions and put it in the appendix
 . prepare bibliography using jabref
+. write abstract, starting from the one sent to Holger maybe
