@@ -1,7 +1,12 @@
 # Things to do in the paper
 
+. conclusione
+. check punti dove hai messo !!! in parentesi quadre
+. write abstract, starting from the one sent to Holger maybe
+
 . Write all captions of tables
+. create appendix
 . put summary statistics in appendix, ideally fix number formatting
 . create table with variable definitions and put it in the appendix
-. prepare bibliography using jabref
-. write abstract, starting from the one sent to Holger maybe
+. togli doi dalle citazioni se riesci
+. rileggi e correggi

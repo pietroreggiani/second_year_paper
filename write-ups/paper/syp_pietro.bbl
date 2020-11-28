@@ -1,0 +1,147 @@
+\begin{thebibliography}{20}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Albuquerque et~al.(2020)Albuquerque, Koskinen, Yang, and
+  Zhang]{albuquerque2020}
+Rui Albuquerque, Yrjo Koskinen, Shuai Yang, and Chendi Zhang.
+\newblock Love in the time of covid-19: The resiliency of environmental and
+  social stocks.
+\newblock \emph{CEPR Covid Economics, Vetted and Real-Time Papers}, April 2020.
+
+\bibitem[Barber and Odean(2001)]{Barber_2001}
+B.~M. Barber and T.~Odean.
+\newblock Boys will be boys: Gender, overconfidence, and common stock
+  investment.
+\newblock \emph{The Quarterly Journal of Economics}, 116\penalty0 (1):\penalty0
+  261--292, feb 2001.
+\newblock \doi{https://doi.org/10.1162/003355301556400}.
+
+\bibitem[Barber and Odean(2000)]{Barber_2000}
+Brad~M. Barber and Terrance Odean.
+\newblock Trading is hazardous to your wealth: The common stock investment
+  performance of individual investors.
+\newblock \emph{The Journal of Finance}, 55\penalty0 (2):\penalty0 773--806,
+  apr 2000.
+\newblock \doi{https://doi.org/10.1111/0022-1082.00226}.
+
+\bibitem[Barber and Odean(2007)]{Barber_2007}
+Brad~M. Barber and Terrance Odean.
+\newblock All that glitters: The effect of attention and news on the buying
+  behavior of individual and institutional investors.
+\newblock \emph{Review of Financial Studies}, 21\penalty0 (2):\penalty0
+  785--818, dec 2007.
+\newblock \doi{https://doi.org/10.1093/rfs/hhm079}.
+
+\bibitem[Barber and Odean(2013)]{Barber_2013}
+Brad~M. Barber and Terrance Odean.
+\newblock The behavior of individual investors.
+\newblock pages 1533--1570, 2013.
+\newblock \doi{https://doi.org/10.1016/B978-0-44-459406-8.00022-6}.
+
+\bibitem[Barber et~al.(2008)Barber, Odean, and Zhu]{Barber_2008}
+Brad~M. Barber, Terrance Odean, and Ning Zhu.
+\newblock Do retail trades move markets?
+\newblock \emph{Review of Financial Studies}, 22\penalty0 (1):\penalty0
+  151--186, apr 2008.
+\newblock \doi{https://doi.org/10.1093/rfs/hhn035}.
+
+\bibitem[Carletti et~al.(2020)Carletti, Oliviero, Pagano, Pelizzon, and
+  Subrahmanyam]{Carletti_2020}
+Elena Carletti, Tommaso Oliviero, Marco Pagano, Loriana Pelizzon, and Marti~G
+  Subrahmanyam.
+\newblock The {COVID}-19 shock and equity shortfall: Firm-level evidence from
+  italy.
+\newblock \emph{The Review of Corporate Finance Studies}, 9\penalty0
+  (3):\penalty0 534--568, aug 2020.
+\newblock \doi{https://doi.org/10.1093/rcfs/cfaa014}.
+
+\bibitem[Coelho et~al.(2010)Coelho, John, and Taffler]{Coelho_2010}
+Luis Coelho, Kose John, and Richard~J. Taffler.
+\newblock Bankrupt firms: Who's buying?
+\newblock \emph{{SSRN} Electronic Journal}, 2010.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.1572733}.
+
+\bibitem[Coelho et~al.(2014)Coelho, John, Kumar, and Taffler]{Coelho_2014}
+Luis Coelho, Kose John, Alok Kumar, and Richard Taffler.
+\newblock Bankruptcy sells stockss but who{\textquotesingle}s buying (and why)?
+\newblock \emph{{SSRN} Electronic Journal}, 2014.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.2427770}.
+
+\bibitem[Fahlenbrach et~al.(2020)Fahlenbrach, Rageth, and
+  Stulz]{Fahlenbrach_2020}
+Rüdiger Fahlenbrach, Kevin Rageth, and Ren{\'{e}} Stulz.
+\newblock How valuable is financial flexibility when revenue stops? evidence
+  from the {COVID}-19 crisis.
+\newblock may 2020.
+\newblock \doi{10.3386/w27106}.
+
+\bibitem[Garel and Petit-Romec(2020)]{Garel_2020}
+Alexandre Garel and Arthur Petit-Romec.
+\newblock Investor rewards to environmental responsibility in the {COVID}-19
+  crisis.
+\newblock \emph{{SSRN} Electronic Journal}, 2020.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.3620109}.
+
+\bibitem[Glossner et~al.(2020)Glossner, Matos, Ramelli, and
+  Wagner]{Glossner2020}
+Simon Glossner, Pedro Matos, Stefano Ramelli, and Alexander Wagner.
+\newblock Where do institutional investors seek shelter when disaster strikes.
+\newblock \emph{Working Paper}, July 2020.
+
+\bibitem[Han and Kumar(2013)]{Han_2013}
+Bing Han and Alok Kumar.
+\newblock Speculative retail trading and asset prices.
+\newblock \emph{Journal of Financial and Quantitative Analysis}, 48\penalty0
+  (2):\penalty0 377--404, mar 2013.
+\newblock \doi{https://doi.org/10.1017/S0022109013000100}.
+
+\bibitem[Liaukonyte and Zaldokas(2019)]{Liaukonyte_2019}
+Jura Liaukonyte and Alminas Zaldokas.
+\newblock Background noise? {TV} advertising affects real time investor
+  behavior.
+\newblock \emph{{SSRN} Electronic Journal}, 2019.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.3336176}.
+
+\bibitem[Moss et~al.(2020)Moss, Naughton, and Wang]{Moss_2020}
+Austin Moss, James~P. Naughton, and Clare Wang.
+\newblock The irrelevance of {ESG} disclosure to retail investors: Evidence
+  from robinhood.
+\newblock \emph{{SSRN} Electronic Journal}, 2020.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.3604847}.
+
+\bibitem[Pagano et~al.(2020)Pagano, Sedunov, and Velthuis]{Pagano_2020}
+Michael~S. Pagano, John Sedunov, and Raisa Velthuis.
+\newblock How did retail investors respond to the {COVID}-19 pandemic? the
+  effect of robinhood brokerage customers on market quality.
+\newblock \emph{{SSRN} Electronic Journal}, 2020.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.3703815}.
+
+\bibitem[Pastor and Vorsatz(2020)]{pastor2020mutual}
+Lubos Pastor and M~Blair Vorsatz.
+\newblock Mutual fund performance and flows during the covid-19 crisis.
+\newblock \emph{NBER Working Paper}, 2020.
+
+\bibitem[Ramelli and Wagner(2020)]{Ramelli_2020}
+Stefano Ramelli and Alexander~F. Wagner.
+\newblock Feverish stock price reactions to the novel coronavirus.
+\newblock \emph{{SSRN} Electronic Journal}, 2020.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.3550274}.
+
+\bibitem[Stein(2020)]{Stein_2020}
+Roberto Stein.
+\newblock The top 5 predictable effects of new entries in robinhood's `100 most
+  popular' list.
+\newblock \emph{{SSRN} Electronic Journal}, 2020.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.3694588}.
+
+\bibitem[Welch(2020)]{Welch_2020}
+Ivo Welch.
+\newblock Retail raw: Wisdom of the robinhood crowd and the {COVID} crisis.
+\newblock \emph{{SSRN} Electronic Journal}, 2020.
+\newblock \doi{https://dx.doi.org/10.2139/ssrn.3696066}.
+
+\end{thebibliography}

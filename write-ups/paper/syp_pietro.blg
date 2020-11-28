@@ -1,0 +1,68 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: syp_pietro.aux
+Reallocating 'name_of_file' (item size: 1) to 21 items.
+Reallocating 'name_of_file' (item size: 1) to 9 items.
+The style file: plainnat.bst
+Database file #1: bibliography_2yp.bib
+You're missing a field name---line 9 of file bibliography_2yp.bib
+ :            
+ :            = {Where},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Repeated entry---line 69 of file bibliography_2yp.bib
+ : @article{Glossner2020
+ :                      ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 95 of file bibliography_2yp.bib
+ : @article{Welch_2020
+ :                    ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 135 of file bibliography_2yp.bib
+ : @article{Pagano_2020
+ :                     ,
+I'm skipping whatever remains of this entry
+Warning--empty journal in Barber_2013
+Warning--empty journal in Fahlenbrach_2020
+You've used 20 entries,
+            2773 wiz_defined-function locations,
+            723 strings with 8682 characters,
+and the built_in function-call counts, 8897 in all, are:
+= -- 811
+> -- 524
+< -- 12
++ -- 176
+- -- 156
+* -- 724
+:= -- 1406
+add.period$ -- 77
+call.type$ -- 20
+change.case$ -- 112
+chr.to.int$ -- 20
+cite$ -- 42
+duplicate$ -- 407
+empty$ -- 688
+format.name$ -- 194
+if$ -- 1838
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 20
+newline$ -- 125
+num.names$ -- 80
+pop$ -- 201
+preamble$ -- 1
+purify$ -- 92
+quote$ -- 0
+skip$ -- 317
+stack$ -- 0
+substring$ -- 230
+swap$ -- 38
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 220
+warning$ -- 2
+while$ -- 75
+width$ -- 0
+write$ -- 286
+(There were 4 error messages)

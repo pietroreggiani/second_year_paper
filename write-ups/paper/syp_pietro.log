@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.11) (preloaded format=pdflatex 2020.11.6)  27 NOV 2020 18:37
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.11) (preloaded format=pdflatex 2020.11.6)  28 NOV 2020 18:43
 entering extended mode
 **./syp_pietro.tex
 (syp_pietro.tex
@@ -478,22 +478,22 @@ File: l3backend-pdftex.def 2020-09-24 L3 backend support: PDF output (pdfTeX)
 (syp_pietro.aux)
 \openout1 = `syp_pietro.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 43.
-LaTeX Font Info:    ... okay on input line 43.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 43.
-LaTeX Font Info:    ... okay on input line 43.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 43.
-LaTeX Font Info:    ... okay on input line 43.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 43.
-LaTeX Font Info:    ... okay on input line 43.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 43.
-LaTeX Font Info:    ... okay on input line 43.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 43.
-LaTeX Font Info:    ... okay on input line 43.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 43.
-LaTeX Font Info:    ... okay on input line 43.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 43.
-LaTeX Font Info:    ... okay on input line 43.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -548,7 +548,7 @@ Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 85.
 )
-Package hyperref Info: Link coloring OFF on input line 43.
+Package hyperref Info: Link coloring OFF on input line 44.
 
 ("C:\Program Files\MiKTeX\tex/latex/hyperref\nameref.sty"
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
@@ -561,9 +561,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count307
 )
-LaTeX Info: Redefining \ref on input line 43.
-LaTeX Info: Redefining \pageref on input line 43.
-LaTeX Info: Redefining \nameref on input line 43.
+LaTeX Info: Redefining \ref on input line 44.
+LaTeX Info: Redefining \pageref on input line 44.
+LaTeX Info: Redefining \nameref on input line 44.
 
 (syp_pietro.out) (syp_pietro.out)
 \@outlinefile=\write3
@@ -571,13 +571,13 @@ LaTeX Info: Redefining \nameref on input line 43.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 55.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 56.
 
 
 ("C:\Program Files\MiKTeX\tex/latex/amsfonts\umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 55.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 56.
 
 
 ("C:\Program Files\MiKTeX\tex/latex/amsfonts\umsb.fd"
@@ -589,65 +589,70 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \tf@toc=\write4
 \openout4 = `syp_pietro.toc'.
 
- [2] [3]
-(../../output/tables/sumtable1.tex
+ [2] [3] [4] [5]
+[6] (../../output/tables/sumtable1.tex
 Overfull \hbox (75.53905pt too wide) in paragraph at lines 3--26
  [][] 
  []
 
 )
-<../../output/charts/value.png, id=69, 650.43pt x 433.62pt>
+<../../output/charts/value.png, id=141, 650.43pt x 433.62pt>
 File: ../../output/charts/value.png Graphic file (type png)
 <use ../../output/charts/value.png>
-Package pdftex.def Info: ../../output/charts/value.png  used on input line 108.
+Package pdftex.def Info: ../../output/charts/value.png  used on input line 142.
 
 (pdftex.def)             Requested size: 325.2142pt x 216.80946pt.
- [4] [5] [6 <../../output/charts/value.png>]
-(../../output/tables/pre_fe_tab_enscore_slides.tex) [7] [8]
-<../../output/charts/MSFT.png, id=116, 462.528pt x 346.896pt>
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[7] [8] (../../output/tables/pre_fe_tab_enscore_slides.tex) [9 <../../output/ch
+arts/value.png>]
+<../../output/charts/MSFT.png, id=174, 462.528pt x 346.896pt>
 File: ../../output/charts/MSFT.png Graphic file (type png)
 <use ../../output/charts/MSFT.png>
-Package pdftex.def Info: ../../output/charts/MSFT.png  used on input line 149.
+Package pdftex.def Info: ../../output/charts/MSFT.png  used on input line 183.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/GOOGL.png, id=117, 462.528pt x 346.896pt>
+<../../output/charts/GOOGL.png, id=175, 462.528pt x 346.896pt>
 File: ../../output/charts/GOOGL.png Graphic file (type png)
 <use ../../output/charts/GOOGL.png>
-Package pdftex.def Info: ../../output/charts/GOOGL.png  used on input line 153.
+Package pdftex.def Info: ../../output/charts/GOOGL.png  used on input line 187.
 
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/AMZN.png, id=118, 462.528pt x 346.896pt>
+<../../output/charts/AMZN.png, id=176, 462.528pt x 346.896pt>
 File: ../../output/charts/AMZN.png Graphic file (type png)
 <use ../../output/charts/AMZN.png>
-Package pdftex.def Info: ../../output/charts/AMZN.png  used on input line 163.
+Package pdftex.def Info: ../../output/charts/AMZN.png  used on input line 197.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/TSLA.png, id=119, 462.528pt x 346.896pt>
+<../../output/charts/TSLA.png, id=177, 462.528pt x 346.896pt>
 File: ../../output/charts/TSLA.png Graphic file (type png)
 <use ../../output/charts/TSLA.png>
-Package pdftex.def Info: ../../output/charts/TSLA.png  used on input line 167.
+Package pdftex.def Info: ../../output/charts/TSLA.png  used on input line 201.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/AAL.png, id=120, 462.528pt x 346.896pt>
+<../../output/charts/AAL.png, id=178, 462.528pt x 346.896pt>
 File: ../../output/charts/AAL.png Graphic file (type png)
 <use ../../output/charts/AAL.png>
-Package pdftex.def Info: ../../output/charts/AAL.png  used on input line 177.
+Package pdftex.def Info: ../../output/charts/AAL.png  used on input line 211.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
-<../../output/charts/HTZ.png, id=121, 462.528pt x 346.896pt>
+<../../output/charts/HTZ.png, id=179, 462.528pt x 346.896pt>
 File: ../../output/charts/HTZ.png Graphic file (type png)
 <use ../../output/charts/HTZ.png>
-Package pdftex.def Info: ../../output/charts/HTZ.png  used on input line 181.
+Package pdftex.def Info: ../../output/charts/HTZ.png  used on input line 215.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
- [9 <../../output/charts/MSFT.png> <../../output/charts/GOOGL.png> <../../outpu
-t/charts/AMZN.png> <../../output/charts/TSLA.png>]
-<../../output/charts/sectors_crash.png, id=132, 650.43pt x 433.62pt>
+ [10] [11] [12 <../../output/charts/MSFT.png> <../../output/charts/GOOGL.png> <
+../../output/charts/AMZN.png> <../../output/charts/TSLA.png> <../../output/char
+ts/AAL.png> <../../output/charts/HTZ.png>]
+<../../output/charts/sectors_crash.png, id=204, 650.43pt x 433.62pt>
 File: ../../output/charts/sectors_crash.png Graphic file (type png)
 <use ../../output/charts/sectors_crash.png>
 Package pdftex.def Info: ../../output/charts/sectors_crash.png  used on input l
-ine 193.
+ine 227.
 (pdftex.def)             Requested size: 375.80544pt x 250.54037pt.
-<../../output/charts/sectors_recovery.png, id=133, 650.43pt x 433.62pt>
+<../../output/charts/sectors_recovery.png, id=205, 650.43pt x 433.62pt>
 File: ../../output/charts/sectors_recovery.png Graphic file (type png)
 <use ../../output/charts/sectors_recovery.png>
 Package pdftex.def Info: ../../output/charts/sectors_recovery.png  used on inpu
-t line 197.
+t line 231.
 (pdftex.def)             Requested size: 375.80544pt x 250.54037pt.
 
 (../../output/tables/crash_fe_tab_enscore_slides.tex
@@ -655,14 +660,13 @@ Overfull \hbox (34.45854pt too wide) in paragraph at lines 1--35
 [][] 
  []
 
-) [10 <../../output/charts/AAL.png> <../../output/charts/HTZ.png>] [11 <../../o
-utput/charts/sectors_crash.png> <../../output/charts/sectors_recovery.png>]
-[12] (../../output/tables/recovery_fe_tab_enscore_slides.tex
+) [13] [14 <../../output/charts/sectors_crash.png> <../../output/charts/sectors
+_recovery.png>] [15] (../../output/tables/recovery_fe_tab_enscore_slides.tex
 Overfull \hbox (28.44493pt too wide) in paragraph at lines 1--35
 [][] 
  []
 
-) [13] [14] (../../output/tables/sumtable2.tex
+) [16] [17] (syp_pietro.bbl [18]) [19] (../../output/tables/sumtable2.tex
 Overfull \hbox (75.53905pt too wide) in paragraph at lines 3--26
  [][] 
  []
@@ -672,33 +676,34 @@ Overfull \hbox (75.8696pt too wide) in paragraph at lines 3--26
  [][] 
  []
 
-) [15] [16] (syp_pietro.aux)
+) [20] [21] (syp_pietro.aux)
 Package rerunfilecheck Info: File `syp_pietro.out' has not changed.
 (rerunfilecheck)             Checksum: 92E0DC4510EE7FBBBE32EABE3DFC43DA;462.
  ) 
 Here is how much of TeX's memory you used:
- 12211 strings out of 479799
- 186405 string characters out of 2879599
- 526400 words of memory out of 3000000
- 28909 multiletter control sequences out of 15000+200000
- 545451 words of font info for 69 fonts, out of 3000000 for 9000
+ 12319 strings out of 479799
+ 188274 string characters out of 2879599
+ 527552 words of memory out of 3000000
+ 28985 multiletter control sequences out of 15000+200000
+ 545788 words of font info for 70 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  66i,14n,74p,1831b,497s stack positions out of 5000i,500n,10000p,200000b,50000s
-<C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Progra
-m Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Files/MiKT
-eX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files/MiKTeX/fonts/typ
-e1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/ams
-fonts/cm/cmr10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr1
-2.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Pro
-gram Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Program Files/MiK
-TeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files/MiKTeX/fonts/type
-1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/ams
-fonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmti
-12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-<C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on syp_pietro.pdf (16 pages, 442775 bytes).
+ <C:\Users\pietr\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
+1200.pk><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/
+Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program File
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/c
+m/cmr12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><
+C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Program Fil
+es/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files/MiKTeX/font
+s/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/c
+m/cmti12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msam1
+0.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on syp_pietro.pdf (21 pages, 472251 bytes).
 PDF statistics:
- 234 PDF objects out of 1000 (max. 8388607)
- 42 named destinations out of 1000 (max. 500000)
+ 329 PDF objects out of 1000 (max. 8388607)
+ 70 named destinations out of 1000 (max. 500000)
  102 words of extra memory for PDF output out of 10000 (max. 10000000)
 

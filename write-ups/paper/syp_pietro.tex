@@ -16,6 +16,7 @@
 \usepackage{booktabs}
 \usepackage{subcaption}
 \usepackage{adjustbox}
+\usepackage[round]{natbib}
 %\usepackage{caption}
 %\usepackage{siunitx}
     
@@ -66,17 +67,49 @@ Test of the abstract
 
 \section{Introduction}
 
+With the arrival of the Covid-19 pandemic, the habits of most people changed drastically. An example is the change in how people approach financial markets, and the amount of attention devoted to them. With the aid of new technologies, barriers to entry for people to invest in financial markets have lowered. The pandemic outbreak forced people in their homes, depriving them of most occupations, leisure, hobbies. With broad access to the internet however, many were able to access financial trading platforms. Thanks to new players in the retail brokerage market, who made it even simpler to open a low cost account and trade, there was a boom in market participation also from people that had no investing experience.
 
-\section{Related Literature}
+This phenomenon put retail investors under the spotlight, fostering renewed curiosity around their behavior and preferences. The objective of this paper is to study the investment choices of a particular sample of retail investors, tilted towards younger people that invest through an application on their smart-phones. In particular, the goal is to analyze their portfolio decisions before, during and after the market collapse induced by the recent pandemic. Using data from a widespread brokerage platform, we observe the cross-section of popularity of different stocks among investors over three different sample periods: the period before the emergence of Covid-19, until February 2020, the market collapse between February and March 2020, and the subsequent market recovery until August 2020.
 
-\section{Data and Summary Statistics}
+The findings suggest that the reaction of these investors during the crisis is quite different from "flight to quality" dynamics. In fact, we find that since the onset of the pandemic investors' interest was directed strongly towards the weakest firms. This is consistent with some sort of contrarian mentality, and a search for value in inexpensive stocks. This can lead to excessive risk taking. Moreover, contrary to other existing research, we find no evidence of a heightened environmental taste on the part of investors since the pandemic.
 
-The analysis focuses on a peculiar sample of retail investors, the users of a retail trading platform called \textit{Robinhood}\footnote{https://robinhood.com/us/en/}. This company was the first to offer a commission-free brokerage account, easily accessible to investors through a smart phone application. 
+These results are important because they shed light on a new sample of retail market participants, who are likely to behave differently especially in periods of turmoil as the one we analyze. As the ease of access to financial markets is projected to keep growing due to the adoption of new technologies, it becomes crucial to improve our understanding of the preferences of the new investors that enter markets. This has potential implications also for regulation, which may want to guide or limit risk taking on the part of some segments of the population.
 
-[EXPAND ON ROBINHOOD INFO, amount age of users etc. !!!!]
+The remainder of the paper is structured as follows. Section \ref{literature} collocates this work in the context of existing literature. Section \ref{data} describes the data set from the brokerage platform, and shows some descriptive statistics. Section \ref{results} presents the main empirical analysis and results. Finally, section \ref{conclusion} concludes.
 
 
-The main data set is provided directly from the platform through an API\footnote{for more details, visit the data source at https://robintrack.net/.}. Approximately every hour, the company provides the number of users currently holding each asset. The hourly figure is then averaged at the daily level. The sample period stretches from May 2018 until August 2020.
+\section{Related Literature} \label{literature}
+
+This paper relates directly to the vast literature on investor behavior: in particular, the focus is on retail investors. Some of the most prominent work in this field is due to Brad Barber and Terrance Odean. Exploiting detailed data on portfolios and trades from a discount brokerage firm, they studied the behavioral nuances of investors' choices, leading to several influential papers. Their interest is primarily devoted to departures from perfect rationality. For a broad overview of their work, one can read \cite{Barber_2013}.
+
+\cite{Barber_2007} find that individual investors' stock buying behavior is driven by attention: presence in the news, trading volume or extreme daily returns are associated with more purchases. This effect is not present on the sale side, because usually people only sell stocks they already own. A similar patter is observed by \cite{Liaukonyte_2019}, who observe high frequency trading reactions to television advertisements. 
+
+ \cite{Barber_2000} show that individual investors who hold common stock pay a large penalty for active trading. They attribute this effect to overconfidence. As supporting evidence for this explanation, in \cite{Barber_2001}, they document that excessive trading frequency is more common among men, who are known from Psychology to be more prone to overconfidence than women.
+
+An interesting feature of retail investors' preferences -- related to our findings in this paper -- is that they seem to favor stocks that display "lottery-like" characteristics, as shown in \cite{Han_2013}. Bankrupt stocks are an instance of such assets: \cite*{Coelho_2014} find that they attract especially retail traders who use them to gamble in the market. Among our results, we find evidence of a similar behavior in a peculiar subset of retail traders; those active on the \textit{Robinhood} platform. More details on this sub-sample of investors is presented in the next section.
+
+Another important strand of literature connected to this work is the one on investor reaction to crises and in particular to the recent Covid-19 pandemic. Some studies have focused on the impact on stock returns, and on determining which characteristics made assets more resilient in the downturn. \cite{Ramelli_2020} study which were the most important value drivers in the cross-section. \cite*{albuquerque2020} observe that firms with better environmental practices performed better during the market slide, similarly to \cite{Garel_2020}.
+
+Some research has paid attention specifically to the reactions of investors. One example is \cite{pastor2020mutual}, that examines performance and flows of active equity mutual funds during 2020. Their findings suggest that even during the turmoil, active funds performed worse that passive ones. In terms of flows, they find that sustainability ratings and screens were strong predictors of fund inflows.
+
+The work that is most closely related to this one is probably \cite*{Glossner2020}. Their paper studies institutional investors' portfolio adjustments at the onset of the Covid-19 pandemic, using holdings data for different institutions such as mutual funds, investment advisers, pension funds and hedge funds. They find evidence of a general flight to quality on the part of these investors, who reallocated capital towards stocks with strong financials in 2020Q1. They run a similar analysis using the \textit{Robinhood} retail investors, finding evidence of a somewhat opposite behavior: at the beginning of the crash, retail traders favored exactly the weakest firms. In this paper, we will confirm and extend some of their results on the retail sample, especially comparing investor behavior during the market collapse to the one during the subsequent recovery.
+
+
+
+
+
+
+
+
+
+\section{Data and Summary Statistics} \label{data}
+
+The analysis focuses on a peculiar sample of retail investors, the users of a trading platform called \textit{Robinhood}\footnote{https://robinhood.com/us/en/.}. This company was the first to offer a commission-free brokerage account, easily accessible to investors through a smart-phone application. 
+
+The platform currently has approximately 13 million active users\footnote{https://www.businessofapps.com/data/robinhood-statistics/.} and \$20 billion of assets under management. Relative to their competitors, the peculiarity of \textit{Robinhood} is that their users tend to be considerably younger, with an average age of 31\footnote{https://www.nytimes.com/2020/07/08/technology/robinhood-risky-trading.html.}, and that the average account size is smaller, between \$1,000 and \$5,000, far from the \$100,000 of the closest competitor. While the fact of considering such a peculiar sub-sample of retail investors is a potential drawback in terms of external validity, it can represent an advantage in terms of novelty. \textit{Robinhood} users are likely to be relatively inexperienced investors, people that were only recently enabled by new technologies to participate in financial markets. Therefore, they were not previously studied. As the adoption of financial technologies becomes increasingly widespread, it becomes more and more important to study the behavior of these investors.
+
+
+The main data set is provided directly from the platform through an API\footnote{for more details, visit the data source at https://robintrack.net/.}. Approximately every hour, the company provides the number of users currently holding each asset. The hourly figure is then averaged at the daily level. The sample period stretches from May 2018 until August 2020. These data are publicly available, and were previously analyzed in other papers, such as \cite{Stein_2020}, \cite{Welch_2020}, \cite{Pagano_2020} and \cite{Moss_2020}.
 
 It is important to underline the main limitation of the data: the value of investors' positions in each asset is unknown. Intuitively, each investor can own multiple shares of the same stock. In addition, it is possible to invest in fractions of a single share. This means that the numerosity of users is not sufficient to compute portfolio weights. Notice that also the total number of users on the platform is unknown, which prevents us from knowing the fraction of users holding each asset. Therefore, the main variable of interest will be the number of users holding a stock over time. This can be interpreted as a measure of the popularity of that asset among investors.
 
@@ -109,7 +142,7 @@ To illustrate the growth in popularity of the Robinhood platform, we plot in Fig
 \end{figure}
 
 
-\section{Main Empirical Analysis}
+\section{Main Empirical Analysis} \label{results}
 
 We are after the determinants of stock popularity among retail investors, and how these changed during the Covid-19 crisis. The analysis will be carried out by means of cross-sectional regressions. First, in subsection \ref{pre}, we describe the cross-section of stock popularity during the pre-pandemic period. Subsequently, in subsection \ref{covid} we focus on changes in stock popularity during the crash and recovery periods.
 
@@ -225,13 +258,13 @@ where date $t$ is March 20th and $t+1$ is August 7th, and $i$, $j$ and $t$ indic
 \end{table}
 
 
-\section{Conclusion}
+\section{Conclusion} \label{conclusion}
 
 
-%\newpage
-%\nocite{*}
-%\bibliography{bibliography} 
-%\bibliographystyle{plainnat}
+\newpage
+\nocite{*}
+\bibliography{bibliography_2yp.bib} 
+\bibliographystyle{plainnat}
  
  % APPENDIX
  
